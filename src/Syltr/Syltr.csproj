@@ -3,7 +3,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>Syltr_Windows</RootNamespace>
+    <RootNamespace>Syltr</RootNamespace>
+    <AssemblyName>Syltr</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
@@ -53,12 +54,6 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.4.0" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Syltr.Core\Syltr.Core.csproj" />
-    <ProjectReference Include="..\Syltr.Infrastructure\Syltr.Infrastructure.csproj" />
-    <ProjectReference Include="..\Syltr.Web\Syltr.Web.csproj" />
-  </ItemGroup>
-
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
     Explorer "Package and Publish" context menu entry to be enabled for this project even if

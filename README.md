@@ -18,10 +18,10 @@ The repository currently contains the initial, compilable scaffold:
 - WinUI 3 and Windows App SDK 2.2;
 - WebView2 through Windows App SDK;
 - MSIX packaging support;
-- separate projects for UI, domain, infrastructure and web hosting;
-- xUnit test project;
+- a single `Syltr` application project organized by the same responsibilities as the Linux project;
+- an xUnit test project with an architecture test enforcing the module layout;
 - successful Debug build with zero warnings and zero errors;
-- one initial placeholder test passing.
+- normalized `Syltr` assembly, namespaces and application titles.
 
 No product features have been ported yet. The next milestone is the domain model and catalog, followed by the WebView2 isolation spike described below.
 
@@ -58,35 +58,46 @@ We intentionally do not introduce a Rust/.NET FFI boundary in the initial implem
 syltr-windows/
 ├── Syltr.slnx
 ├── src/
-│   ├── Syltr.Core/              Domain models and platform-independent rules
-│   ├── Syltr.Infrastructure/    JSON persistence and Windows integrations
-│   ├── Syltr.Web/               WebView2 environment and ServiceViewHost
-│   └── Syltr.Windows/           WinUI 3 application and MSIX package
+│   └── Syltr/
+│       ├── App.xaml             Application startup and resources
+│       ├── Catalog/             Known service recipes
+│       ├── Config/              Service models, settings and persistence
+│       ├── Engine/              WebView2 sessions and browser integrations
+│       │   ├── Unread/          Unread-count detection and parsing
+│       │   ├── UserAgent/       Per-service user-agent rules
+│       │   └── WebAppScripts/   Service-specific compatibility scripts
+│       ├── Icon/                Service icons, favicons and unread badges
+│       ├── Spellcheck/          Spell-check integration
+│       ├── Window/              Native window, rail, actions and dialogs
+│       ├── Assets/              Windows application and package assets
+│       └── Syltr.csproj         WinUI 3 application and MSIX package
 └── tests/
-    └── Syltr.Core.Tests/        Unit tests for domain behavior
+    └── Syltr.Tests/             Unit tests for ported behavior
 ```
 
-### Dependency direction
+### Structure parity with Linux
 
-```text
-Syltr.Windows ───────► Syltr.Core
-       │                    ▲
-       ├────────────► Syltr.Infrastructure
-       │                    │
-       └────────────► Syltr.Web
-                            │
-                            └────────► Syltr.Core
+The source tree deliberately mirrors the modules in [lukasborges/syltr](https://github.com/lukasborges/syltr):
 
-Syltr.Core.Tests ───► Syltr.Core
-```
+| Linux reference | Windows equivalent | Responsibility |
+| --- | --- | --- |
+| `src/main.rs` | `src/Syltr/App.xaml(.cs)` | Startup, lifecycle and application resources |
+| `src/window/` | `src/Syltr/Window/` | Window, rail, actions, dialogs and native controls |
+| `src/engine/` | `src/Syltr/Engine/` | WebView2 sessions, scripts, favicons, unread state and downloads |
+| `src/config/` | `src/Syltr/Config/` | Service definitions, settings, persistence and application data paths |
+| `src/catalog.rs` | `src/Syltr/Catalog/` | Catalog of known services |
+| `src/icon.rs` | `src/Syltr/Icon/` | Service tile, favicon and unread badge behavior |
+| `src/spellcheck.rs` | `src/Syltr/Spellcheck/` | Platform spell-check integration |
 
-`Syltr.Core` must not reference WinUI, WebView2 or Windows-only APIs. The UI should not manipulate `CoreWebView2` directly; all browser-specific behavior belongs behind an API in `Syltr.Web`.
+This mapping is an architecture contract for the delivery plan. New functionality should first be located in the equivalent reference module, then implemented in its Windows counterpart. A structural divergence is allowed only when required by .NET, WinUI 3, WebView2 or MSIX, and the reason must be documented here. `Assets` and the package manifests remain inside the WinUI project because Windows packaging tooling expects them there.
+
+Module boundaries are enforced through namespaces and public abstractions. `Window` must not manipulate `CoreWebView2` directly; browser-specific behavior belongs behind the public API exposed by `Engine`.
 
 ## Planned architecture
 
-### `Syltr.Core`
+### `Catalog` and `Config`
 
-This project owns stable product concepts and rules:
+These modules own stable product concepts and rules:
 
 - `ServiceDefinition`: id, name, URL, mute, disabled state and optional user-agent;
 - `ServiceCatalogEntry` and catalog categories;
@@ -99,9 +110,7 @@ This project owns stable product concepts and rules:
 
 Domain behavior should be covered by unit tests before it is connected to WinUI.
 
-### `Syltr.Infrastructure`
-
-This project will implement:
+`Config` also owns persistence and platform storage services:
 
 - JSON service and settings stores;
 - atomic writes and graceful handling of corrupted files;
@@ -113,9 +122,9 @@ This project will implement:
 
 The initial persistence schema should remain compatible with the original `services.json` when practical. Configuration can be imported, but WebKitGTK cookies and sessions cannot safely be converted into Chromium/WebView2 profiles; imported services will require login again.
 
-### `Syltr.Web`
+### `Engine`
 
-This project will expose a browser abstraction tentatively named `ServiceViewHost`:
+This module will expose a browser abstraction tentatively named `ServiceViewHost`:
 
 ```text
 InitializeAsync
@@ -147,9 +156,9 @@ Responsibilities include:
 - script injection and the JavaScript/native message bridge;
 - debug console forwarding when enabled.
 
-### `Syltr.Windows`
+### `Window`
 
-This project owns the native user experience:
+This module owns the native user experience:
 
 - main window and title bar;
 - service rail and grouped instance chooser;
@@ -161,6 +170,10 @@ This project owns the native user experience:
 - empty, loading, error and disabled states;
 - activation from a Windows notification;
 - application lifecycle and MSIX manifest.
+
+### `Icon` and `Spellcheck`
+
+`Icon` owns the reusable visual behavior for service tiles, favicons, grouping and unread badges. `Spellcheck` owns Windows-specific spell-check discovery and configuration. These responsibilities remain separate to preserve the same boundaries as the Linux reference project.
 
 ## Browser profile strategy
 
@@ -202,24 +215,26 @@ Linux/WebKit workarounds must never be copied blindly. Every compatibility scrip
 
 ## Delivery plan
 
+The implementation order follows the module map above. Each porting task starts from the behavior and tests in the matching Linux module, preserves its public responsibilities and then adapts only the platform-specific implementation. Phase reviews must verify both feature parity and structural parity before moving forward.
+
 ### Phase 0 — Foundation
 
 Status: **in progress**
 
 - [x] Create an independent Git repository.
 - [x] Create the WinUI 3/MSIX application.
-- [x] Create Core, Infrastructure, Web and test projects.
-- [x] Establish project references and dependency direction.
+- [x] Create the WinUI application and xUnit test projects.
+- [x] Align source modules with the Linux reference structure.
 - [x] Validate Debug build and test execution.
-- [ ] Replace template namespaces, titles and placeholder classes.
+- [x] Replace template namespaces, titles and placeholder classes.
 - [ ] Add repository documentation, formatting rules and CI.
 - [ ] Add the initial application icon and licensing files.
 
 ### Phase 1 — Domain and persistence
 
-- [ ] Port `ServiceDefinition` and settings models.
-- [ ] Port ID generation, URL normalization and unread parsing.
-- [ ] Port the service catalog.
+- [ ] Port `ServiceDefinition` and settings models into `Config`.
+- [ ] Port ID generation and URL normalization into `Config`, and unread parsing into `Engine`.
+- [ ] Port the service catalog into `Catalog`.
 - [ ] Add JSON serialization compatibility tests.
 - [ ] Implement atomic service/settings persistence.
 - [ ] Define local application data paths.
@@ -246,7 +261,7 @@ This is the most important technical gate.
 
 Exit criterion: profile isolation, authentication and the critical WebView integrations work reliably enough to support the product.
 
-If WinUI 3 hosting exposes a blocking limitation, `Syltr.Core` and `Syltr.Infrastructure` should remain unchanged while the host is evaluated in WPF + WebView2. This is a fallback decision, not the default plan.
+If WinUI 3 hosting exposes a blocking limitation, the platform-independent behavior in `Config` and `Catalog` should remain unchanged while the host is evaluated in WPF + WebView2. This is a fallback decision, not the default plan.
 
 ### Phase 3 — Minimum viable product
 
@@ -353,7 +368,7 @@ Possible later optimization:
 
 ## Data locations and migration
 
-The final paths will be centralized in `Syltr.Infrastructure`. The intended categories are:
+The final paths will be centralized in `Syltr.Config`. The intended categories are:
 
 ```text
 Local application data
@@ -400,7 +415,7 @@ dotnet test Syltr.slnx -c Debug
 ### Run
 
 ```powershell
-dotnet run --project src/Syltr.Windows/Syltr.Windows.csproj
+dotnet run --project src/Syltr/Syltr.csproj
 ```
 
 The application is configured for packaged execution with debug identity support. Distribution packaging and signing are not finalized.
@@ -409,9 +424,9 @@ The application is configured for packaged execution with debug identity support
 
 - Nullable reference types remain enabled.
 - New domain behavior requires unit tests.
-- Platform-independent code belongs in `Syltr.Core`.
-- WebView2 types must not leak outside `Syltr.Web` unless an explicit architecture decision documents why.
-- Windows integration belongs in `Syltr.Infrastructure`, not code-behind.
+- Ported code belongs in the Windows module that corresponds to its Linux reference module.
+- WebView2 types must not leak outside `Syltr.Engine` unless an explicit architecture decision documents why.
+- Persistence and application data paths belong in `Syltr.Config`, not code-behind.
 - Code-behind should coordinate view concerns; product rules belong in testable classes.
 - Avoid service-specific hacks in generic hosting code. Put them in named recipes with rationale.
 - Keep compatibility scripts as separate embedded resources instead of large C# string literals.
@@ -451,9 +466,9 @@ Service names and logos may be trademarks of their respective owners. Before dis
 
 ## Immediate next steps
 
-1. Remove template placeholder classes and normalize namespaces/title to `Syltr`.
-2. Implement `ServiceDefinition`, settings and the static catalog in `Syltr.Core`.
-3. Port URL normalization, service ID generation and unread parsing with tests.
-4. Implement JSON persistence in `Syltr.Infrastructure`.
-5. Build the WebView2 multiple-profile spike in `Syltr.Web`.
-6. Record spike results and update the open decisions in this README before building the full UI.
+1. Port `ServiceDefinition`, settings, service ID generation and URL normalization into `Config`, with tests.
+2. Port the static service catalog into `Catalog`, preserving the reference recipes and categories.
+3. Port unread parsing and its tests into `Engine/Unread`.
+4. Implement JSON persistence and Windows application data paths in `Config`.
+5. Build the WebView2 multiple-profile spike in `Engine` behind `ServiceViewHost`.
+6. Port the `Window`, `Icon` and `Spellcheck` behavior module by module, recording any intentional divergence from Linux in this README.

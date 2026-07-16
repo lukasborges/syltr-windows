@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Window
-    x:Class="Syltr_Windows.MainWindow"
+    x:Class="Syltr.Window.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:Syltr_Windows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Syltr.Windows"
+    Title="Syltr"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -18,17 +17,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="AppTitleBar" Title="Syltr.Windows">
+        <TitleBar x:Name="AppTitleBar" Title="Syltr">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
             </TitleBar.IconSource>
         </TitleBar>
 
-        <!--
-            The Frame hosts pages for your application content. Add your UI to
-            MainPage.xaml rather than here so you can use Page features such as
-            navigation events and the Loaded lifecycle.
-        -->
         <Frame x:Name="RootFrame" Grid.Row="1" />
     </Grid>
 </Window>
