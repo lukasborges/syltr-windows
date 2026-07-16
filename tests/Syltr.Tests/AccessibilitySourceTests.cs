@@ -17,7 +17,9 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("AutomationProperties.SetName(InstanceSelector", code);
         Assert.Contains("ResourceDictionary x:Key=\"HighContrast\"", xaml);
         Assert.Contains("SystemColorHighlightColorBrush", xaml);
-        Assert.Contains("Setter Property=\"FontSize\" Value=\"16\"", xaml);
+        Assert.Contains("Style x:Key=\"HeaderSymbolIconViewboxStyle\" TargetType=\"Viewbox\"", xaml);
+        Assert.Contains("Style=\"{StaticResource HeaderSymbolIconViewboxStyle}\"", xaml);
+        Assert.Contains("Style=\"{StaticResource HeaderFontIconStyle}\"", xaml);
         Assert.Contains("MaxWidth=\"520\"", xaml);
         Assert.Contains("ReorderMode=\"Enabled\"", xaml);
         Assert.Contains("CanReorderItems=\"True\"", xaml);
