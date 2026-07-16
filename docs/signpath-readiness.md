@@ -3,6 +3,9 @@
 This checklist separates repository preparation from actions that require a
 SignPath account or approval.
 
+Application status: submitted on 16 July 2026 and awaiting SignPath Foundation
+review. No signing identifiers or certificate subject have been assigned yet.
+
 ## Prepared in the repository
 
 - public source repository: `lukasborges/syltr-windows`;
@@ -18,7 +21,7 @@ SignPath account or approval.
 
 1. Confirm multi-factor authentication is enabled for the GitHub maintainer.
 2. Submit the application at <https://signpath.org/apply> and accept the
-   SignPath Foundation conditions.
+   SignPath Foundation conditions. Completed on 16 July 2026.
 3. Ask SignPath whether the current pre-beta state satisfies its requirement
    that the project already be released. Do not publish an unsigned MSIX merely
    to satisfy that condition.

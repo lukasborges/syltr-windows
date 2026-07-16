@@ -53,6 +53,8 @@ Windows. A auditoria detalhada de paridade continua em
   privacidade. A publicação permanece bloqueada até a assinatura confiável.
 - Políticas públicas de segurança, desinstalação e assinatura preparadas para a
   candidatura ao SignPath Foundation.
+- Candidatura ao SignPath Foundation enviada em 16 de julho de 2026; aguardando
+  análise, publisher e identificadores de integração.
 
 ## Decisões visuais aprovadas
 
