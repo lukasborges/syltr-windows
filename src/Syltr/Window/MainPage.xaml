@@ -309,7 +309,6 @@
                     x:Name="ServiceRail"
                     AllowDrop="True"
                     AutomationProperties.AutomationId="ServiceRail"
-                    AutomationProperties.Name="Serviços"
                     CanDragItems="True"
                     CanReorderItems="True"
                     DragItemsCompleted="OnRailDragItemsCompleted"
@@ -433,7 +432,6 @@
                     Closed="OnStatusInfoBarClosed"
                     IsClosable="True"
                     IsOpen="True"
-                    Message="Inicializando os serviços…"
                     Severity="Informational"
                     Title="Syltr" />
             </Grid>
@@ -442,7 +440,7 @@
         <!-- Kept off-screen for the technical validation actions; it is not product chrome. -->
         <Grid Visibility="Collapsed">
             <ComboBox x:Name="TargetSelector" SelectedIndex="0">
-                <ComboBoxItem Content="Diagnóstico local" Tag="local" />
+                <ComboBoxItem x:Name="LocalDiagnosticTargetItem" Tag="local" />
                 <ComboBoxItem Content="WhatsApp Web" Tag="https://web.whatsapp.com/" />
                 <ComboBoxItem Content="Gmail" Tag="https://mail.google.com/" />
                 <ComboBoxItem Content="Microsoft Teams" Tag="https://teams.microsoft.com/" />

@@ -36,9 +36,6 @@ structure, control placement and service workflows should stay recognizable.
 
 ## Remaining fidelity work
 
-- Continue moving status, notification and engineering-diagnostic text into the
-  new `pt-BR` and `en-US` WinUI resources. The main menu, header, catalog,
-  service-management dialogs, permission prompt and service states are localized.
 - Validate service-specific user-agent quirks against Chromium. Linux's Safari and
   Chrome-on-Linux spoofing must not be copied without a failing Windows service.
 - Port a website-specific compatibility script only when WebView2 reproduces the

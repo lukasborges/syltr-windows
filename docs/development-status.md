@@ -33,8 +33,8 @@ Windows. A auditoria detalhada de paridade continua em
   notificações nativas do Windows.
 - Correção ortográfica gerenciada pelos idiomas e dicionários do Windows, com
   diagnóstico no menu e atalho para as Configurações de idioma do sistema.
-- Infraestrutura WinUI de localização em `pt-BR` e `en-US`, já aplicada ao menu,
-  header, catálogo, diálogos de serviço, permissões e estados principais.
+- Interface localizada em `pt-BR` e `en-US`, incluindo menu, header, catálogo,
+  diálogos, permissões, estados, notificações, downloads e diagnósticos.
 - Configuração JSON atômica com esquema/migração, preferências, ordem dos
   serviços, mute, desativação e user-agent opcional.
 - Atalhos equivalentes ao Linux e atalhos adicionais convencionais do Windows.
@@ -56,12 +56,10 @@ Windows. A auditoria detalhada de paridade continua em
 A etapa de fidelidade visual e de fluxo principal está funcional. O próximo
 marco deve começar pelos itens técnicos restantes, nesta ordem:
 
-1. Concluir a migração dos textos de status, notificações e diagnóstico para os
-   recursos localizados do WinUI.
-2. Implementar importação compatível do `services.json` do Linux, deixando claro
+1. Implementar importação compatível do `services.json` do Linux, deixando claro
    que as contas precisarão de novo login nos perfis WebView2.
-3. Validar OAuth/SSO e classificação de links externos com serviços reais.
-4. Testar quirks de user-agent e scripts específicos somente nos serviços que
+2. Validar OAuth/SSO e classificação de links externos com serviços reais.
+3. Testar quirks de user-agent e scripts específicos somente nos serviços que
    apresentarem falha real no Chromium/WebView2.
 
 Ao retomar, execute primeiro:

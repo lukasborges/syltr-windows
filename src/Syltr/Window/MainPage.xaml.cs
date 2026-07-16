@@ -62,6 +62,9 @@ public sealed partial class MainPage : Page
         LocalizeHeaderButton(ReloadButton, "Header_Reload", "Header_Reload_Tooltip");
         LocalizeHeaderButton(HomeButton, "Header_Home", "Header_Home_Tooltip");
         LocalizeHeaderButton(DoNotDisturbButton, "Header_DoNotDisturb", "Header_DoNotDisturb_Tooltip");
+        AutomationProperties.SetName(ServiceRail, AppText.Get("ServiceRail_AutomationName"));
+        LocalDiagnosticTargetItem.Content = AppText.Get("Diagnostics_LocalTarget");
+        StatusInfoBar.Message = AppText.Get("Status_InitializingServices");
     }
 
     private static void LocalizeHeaderButton(
@@ -113,8 +116,8 @@ public sealed partial class MainPage : Page
 
             if (_services.Count == 0)
             {
-                StatusInfoBar.Title = "Nenhum serviço configurado";
-                StatusInfoBar.Message = "Adicione um serviço para começar.";
+                StatusInfoBar.Title = AppText.Get("Status_NoServicesTitle");
+                StatusInfoBar.Message = AppText.Get("Status_NoServicesMessage");
                 StatusInfoBar.Severity = InfoBarSeverity.Warning;
                 UpdateServiceOverlay();
                 if (loaded.Status == ConfigurationLoadStatus.Created)
@@ -156,15 +159,18 @@ public sealed partial class MainPage : Page
             }
             else if (diagnosticProfiles.Count > 0)
             {
-                StatusInfoBar.Title = "Perfis insuficientes";
-                StatusInfoBar.Message = "São necessários ao menos dois perfis funcionais para comprovar isolamento.";
+                StatusInfoBar.Title = AppText.Get("Diagnostics_InsufficientProfilesTitle");
+                StatusInfoBar.Message = AppText.Get("Diagnostics_InsufficientProfilesMessage");
                 StatusInfoBar.Severity = InfoBarSeverity.Error;
             }
 
             if (readyHosts.Length != enabledHosts.Length)
             {
-                StatusInfoBar.Title = "Alguns perfis falharam";
-                StatusInfoBar.Message = $"{readyHosts.Length} de {enabledHosts.Length} perfis ativos iniciaram. Use Recuperar nas abas com falha.";
+                StatusInfoBar.Title = AppText.Get("Status_SomeProfilesFailedTitle");
+                StatusInfoBar.Message = AppText.Format(
+                    "Status_SomeProfilesFailedMessage",
+                    readyHosts.Length,
+                    enabledHosts.Length);
                 StatusInfoBar.Severity = InfoBarSeverity.Warning;
             }
 
@@ -183,8 +189,11 @@ public sealed partial class MainPage : Page
         {
             _loadingSettings = false;
             await SpikeDiagnosticLog.WriteFailureAsync(paths, exception);
-            StatusInfoBar.Title = "Falha ao iniciar WebView2";
-            StatusInfoBar.Message = $"{exception.Message} Diagnóstico: {SpikeDiagnosticLog.GetPath(paths)}";
+            StatusInfoBar.Title = AppText.Get("Status_WebViewInitializationFailedTitle");
+            StatusInfoBar.Message = AppText.Format(
+                "Status_WebViewInitializationFailedMessage",
+                exception.Message,
+                SpikeDiagnosticLog.GetPath(paths));
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
     }
@@ -389,7 +398,9 @@ public sealed partial class MainPage : Page
         _services[index] = updated;
         railItem.UpdateService(updated);
         await _serviceStore.SaveAsync(_services);
-        StatusInfoBar.Title = muted ? "Notificações silenciadas" : "Notificações reativadas";
+        StatusInfoBar.Title = AppText.Get(muted
+            ? "Notifications_MutedTitle"
+            : "Notifications_UnmutedTitle");
         StatusInfoBar.Message = updated.Name;
         StatusInfoBar.Severity = InfoBarSeverity.Success;
     }
@@ -426,9 +437,11 @@ public sealed partial class MainPage : Page
         }
 
         SelectRailContent();
-        StatusInfoBar.Title = disabled ? "Serviço desativado" : "Serviço ativado";
+        StatusInfoBar.Title = AppText.Get(disabled
+            ? "Service_DisabledTitle"
+            : "Service_EnabledTitle");
         StatusInfoBar.Message = disabled
-            ? "A sessão permanece salva e pode ser reativada pelo mesmo menu."
+            ? AppText.Get("Service_DisabledSessionPreserved")
             : updated.Name;
         StatusInfoBar.Severity = InfoBarSeverity.Success;
     }
@@ -778,10 +791,10 @@ public sealed partial class MainPage : Page
             host.NavigateHome();
         }
 
-        StatusInfoBar.Title = $"{updated.Name} atualizado";
+        StatusInfoBar.Title = AppText.Format("Service_UpdatedTitle", updated.Name);
         StatusInfoBar.Message = updated.Disabled
-            ? $"{updated.Name} foi desativado; sua sessão permanece salva."
-            : $"A sessão de {updated.Name} foi preservada e abriu o endereço configurado.";
+            ? AppText.Format("Service_UpdatedDisabledMessage", updated.Name)
+            : AppText.Format("Service_UpdatedSessionPreservedMessage", updated.Name);
         StatusInfoBar.Severity = InfoBarSeverity.Success;
     }
 
@@ -793,8 +806,8 @@ public sealed partial class MainPage : Page
         var host = SelectedHost();
         if (host is null || host.State.Status != ServiceViewStatus.Failed)
         {
-            StatusInfoBar.Title = "Recuperação não necessária";
-            StatusInfoBar.Message = "O serviço selecionado não está em estado de falha.";
+            StatusInfoBar.Title = AppText.Get("Recovery_NotRequiredTitle");
+            StatusInfoBar.Message = AppText.Get("Recovery_NotRequiredMessage");
             StatusInfoBar.Severity = InfoBarSeverity.Informational;
             return;
         }
@@ -802,13 +815,13 @@ public sealed partial class MainPage : Page
         try
         {
             await host.RecoverAsync();
-            StatusInfoBar.Title = "Perfil recuperado";
-            StatusInfoBar.Message = $"{host.ProfileName} foi recriado usando a mesma sessão persistente.";
+            StatusInfoBar.Title = AppText.Get("Recovery_CompletedTitle");
+            StatusInfoBar.Message = AppText.Format("Recovery_CompletedMessage", host.ProfileName);
             StatusInfoBar.Severity = InfoBarSeverity.Success;
         }
         catch (Exception exception)
         {
-            StatusInfoBar.Title = "Falha na recuperação";
+            StatusInfoBar.Title = AppText.Get("Recovery_FailedTitle");
             StatusInfoBar.Message = exception.Message;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
@@ -930,23 +943,30 @@ public sealed partial class MainPage : Page
             var processGroups = snapshot.Processes
                 .GroupBy(process => process.Kind)
                 .OrderBy(group => group.Key)
-                .Select(group => $"{group.Key}: {group.Count()} processo(s), {FormatBytes(group.Sum(process => process.WorkingSetBytes))}");
+                .Select(group => AppText.Format(
+                    "Memory_ProcessGroup",
+                    group.Key,
+                    group.Count(),
+                    FormatBytes(group.Sum(process => process.WorkingSetBytes))));
             var details = string.Join(Environment.NewLine, processGroups);
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = $"Memória WebView2 · {_hosts.Count} serviços",
-                Content = $"Working set: {FormatBytes(snapshot.TotalWorkingSetBytes)}\n" +
-                          $"Memória privada: {FormatBytes(snapshot.TotalPrivateMemoryBytes)}\n" +
-                          $"Processos: {snapshot.Processes.Count}\n\n{details}",
-                CloseButtonText = "Fechar",
+                Title = AppText.Format("Memory_Title", _hosts.Count),
+                Content = AppText.Format(
+                    "Memory_Content",
+                    FormatBytes(snapshot.TotalWorkingSetBytes),
+                    FormatBytes(snapshot.TotalPrivateMemoryBytes),
+                    snapshot.Processes.Count,
+                    details),
+                CloseButtonText = AppText.Get("Common_Close"),
                 DefaultButton = ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }
         catch (Exception exception)
         {
-            StatusInfoBar.Title = "Não foi possível medir a memória";
+            StatusInfoBar.Title = AppText.Get("Memory_FailedTitle");
             StatusInfoBar.Message = exception.Message;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
@@ -956,8 +976,9 @@ public sealed partial class MainPage : Page
     {
         if (_windowsNotifications is not { IsRegistered: true })
         {
-            StatusInfoBar.Title = "Notificações do Windows indisponíveis";
-            StatusInfoBar.Message = _windowsNotifications?.RegistrationError ?? "O registro não foi concluído.";
+            StatusInfoBar.Title = AppText.Get("WindowsNotification_UnavailableTitle");
+            StatusInfoBar.Message = _windowsNotifications?.RegistrationError
+                ?? AppText.Get("WindowsNotification_RegistrationIncomplete");
             StatusInfoBar.Severity = InfoBarSeverity.Error;
             return;
         }
@@ -967,15 +988,15 @@ public sealed partial class MainPage : Page
             var profileName = SelectedHost()?.ProfileName ?? "syltr";
             _windowsNotifications.Show(
                 profileName,
-                "Teste do Syltr",
-                $"A ponte nativa está funcionando para {profileName}.");
-            StatusInfoBar.Title = "Notificação enviada ao Windows";
-            StatusInfoBar.Message = "Clique nela para confirmar a ativação do perfil de origem.";
+                AppText.Get("WindowsNotification_TestTitle"),
+                AppText.Format("WindowsNotification_TestBody", profileName));
+            StatusInfoBar.Title = AppText.Get("WindowsNotification_SentTitle");
+            StatusInfoBar.Message = AppText.Get("WindowsNotification_SentMessage");
             StatusInfoBar.Severity = InfoBarSeverity.Success;
         }
         catch (Exception exception)
         {
-            StatusInfoBar.Title = "Falha ao enviar notificação";
+            StatusInfoBar.Title = AppText.Get("WindowsNotification_FailedTitle");
             StatusInfoBar.Message = exception.Message;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
@@ -999,8 +1020,8 @@ public sealed partial class MainPage : Page
             }
         }
 
-        StatusInfoBar.Title = "Teste de autenticação";
-        StatusInfoBar.Message = "Cada aba usa um perfil persistente diferente. Faça login com contas distintas para validar a separação.";
+        StatusInfoBar.Title = AppText.Get("Diagnostics_AuthenticationTitle");
+        StatusInfoBar.Message = AppText.Get("Diagnostics_AuthenticationMessage");
         StatusInfoBar.Severity = InfoBarSeverity.Informational;
     }
 
@@ -1125,14 +1146,14 @@ public sealed partial class MainPage : Page
         {
             if (!await Windows.System.Launcher.LaunchUriAsync(e.Destination))
             {
-                StatusInfoBar.Title = "Não foi possível abrir o link";
+                StatusInfoBar.Title = AppText.Get("ExternalLink_FailedTitle");
                 StatusInfoBar.Message = e.DestinationOrigin?.ToString() ?? e.Destination.Scheme;
                 StatusInfoBar.Severity = InfoBarSeverity.Error;
             }
         }
         catch
         {
-            StatusInfoBar.Title = "Não foi possível abrir o link";
+            StatusInfoBar.Title = AppText.Get("ExternalLink_FailedTitle");
             StatusInfoBar.Message = e.DestinationOrigin?.ToString() ?? e.Destination.Scheme;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
@@ -1170,7 +1191,7 @@ public sealed partial class MainPage : Page
             }
         }
 
-        var openButton = new Button { Content = "Abrir serviço" };
+        var openButton = new Button { Content = AppText.Get("Notification_OpenService") };
         openButton.Click += (_, _) =>
         {
             SelectProfile(notification.ProfileName);
@@ -1187,8 +1208,11 @@ public sealed partial class MainPage : Page
             ? notification.SenderOrigin.Host
             : notification.Title;
         StatusInfoBar.Message = string.IsNullOrWhiteSpace(notification.Body)
-            ? $"Notificação de {notification.SenderOrigin.Host} · {notification.ProfileName}"
-            : $"{notification.Body} · {notification.ProfileName}";
+            ? AppText.Format(
+                "Notification_FallbackMessage",
+                notification.SenderOrigin.Host,
+                notification.ProfileName)
+            : AppText.Format("Notification_BodyWithProfile", notification.Body, notification.ProfileName);
         StatusInfoBar.Severity = InfoBarSeverity.Informational;
         StatusInfoBar.ActionButton = openButton;
         StatusInfoBar.IsClosable = true;
@@ -1310,11 +1334,11 @@ public sealed partial class MainPage : Page
         DoNotDisturbIcon.Glyph = _settings.DoNotDisturb ? "\uEB71" : "\uEA8F";
         await _settingsStore.SaveAsync(_settings);
         StatusInfoBar.Title = _settings.DoNotDisturb
-            ? "Não perturbe ativado"
-            : "Não perturbe desativado";
+            ? AppText.Get("DoNotDisturb_EnabledTitle")
+            : AppText.Get("DoNotDisturb_DisabledTitle");
         StatusInfoBar.Message = _settings.DoNotDisturb
-            ? "Notificações web serão dispensadas até você desativar este modo."
-            : "Notificações dos serviços não silenciados voltarão a aparecer.";
+            ? AppText.Get("DoNotDisturb_EnabledMessage")
+            : AppText.Get("DoNotDisturb_DisabledMessage");
         StatusInfoBar.Severity = InfoBarSeverity.Informational;
     }
 
@@ -1343,14 +1367,17 @@ public sealed partial class MainPage : Page
             _reservedDownloadPaths.Add(destination);
             request.SaveTo(destination);
 
-            StatusInfoBar.Title = $"Baixando {Path.GetFileName(destination)}";
-            StatusInfoBar.Message = $"Perfil {request.ProfileName} · {request.SourceOrigin.Host}";
+            StatusInfoBar.Title = AppText.Format("Download_InProgressTitle", Path.GetFileName(destination));
+            StatusInfoBar.Message = AppText.Format(
+                "Download_SourceMessage",
+                request.ProfileName,
+                request.SourceOrigin.Host);
             StatusInfoBar.Severity = InfoBarSeverity.Informational;
         }
         catch (Exception exception)
         {
             request.Cancel();
-            StatusInfoBar.Title = "Download cancelado";
+            StatusInfoBar.Title = AppText.Get("Download_CancelledTitle");
             StatusInfoBar.Message = exception.Message;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
@@ -1367,7 +1394,7 @@ public sealed partial class MainPage : Page
         switch (state.Status)
         {
             case ServiceDownloadStatus.Completed:
-                StatusInfoBar.Title = $"Download concluído: {state.FileName}";
+                StatusInfoBar.Title = AppText.Format("Download_CompletedTitle", state.FileName);
                 StatusInfoBar.Message = state.DestinationPath;
                 StatusInfoBar.Severity = InfoBarSeverity.Success;
                 if (!_settings.DoNotDisturb && _windowsNotifications is { IsRegistered: true })
@@ -1376,7 +1403,7 @@ public sealed partial class MainPage : Page
                     {
                         _windowsNotifications.Show(
                             state.ProfileName,
-                            "Download concluído",
+                            AppText.Get("Download_CompletedNotificationTitle"),
                             state.FileName);
                     }
                     catch
@@ -1387,12 +1414,12 @@ public sealed partial class MainPage : Page
 
                 break;
             case ServiceDownloadStatus.Interrupted:
-                StatusInfoBar.Title = $"Download interrompido: {state.FileName}";
-                StatusInfoBar.Message = state.ErrorMessage ?? "O navegador interrompeu o download.";
+                StatusInfoBar.Title = AppText.Format("Download_InterruptedTitle", state.FileName);
+                StatusInfoBar.Message = state.ErrorMessage ?? AppText.Get("Download_InterruptedMessage");
                 StatusInfoBar.Severity = InfoBarSeverity.Error;
                 break;
             default:
-                StatusInfoBar.Title = $"Baixando {state.FileName}";
+                StatusInfoBar.Title = AppText.Format("Download_InProgressTitle", state.FileName);
                 StatusInfoBar.Message = FormatDownloadProgress(state);
                 StatusInfoBar.Severity = InfoBarSeverity.Informational;
                 break;
@@ -1403,8 +1430,12 @@ public sealed partial class MainPage : Page
     {
         var received = FormatBytes(state.BytesReceived);
         return state.TotalBytes is > 0
-            ? $"{received} de {FormatBytes(state.TotalBytes.Value)} · {state.ProfileName}"
-            : $"{received} recebidos · {state.ProfileName}";
+            ? AppText.Format(
+                "Download_ProgressKnown",
+                received,
+                FormatBytes(state.TotalBytes.Value),
+                state.ProfileName)
+            : AppText.Format("Download_ProgressUnknown", received, state.ProfileName);
     }
 
     private static string FormatBytes(long bytes)
@@ -1542,8 +1573,8 @@ public sealed partial class MainPage : Page
     {
         if (!result.CurrentRunIsIsolated)
         {
-            StatusInfoBar.Title = "Falha no isolamento";
-            StatusInfoBar.Message = "Os perfis não mantiveram valores de armazenamento distintos.";
+            StatusInfoBar.Title = AppText.Get("Diagnostics_IsolationFailedTitle");
+            StatusInfoBar.Message = AppText.Get("Diagnostics_IsolationFailedMessage");
             StatusInfoBar.Severity = InfoBarSeverity.Error;
             return;
         }
@@ -1551,13 +1582,17 @@ public sealed partial class MainPage : Page
         StatusInfoBar.Severity = InfoBarSeverity.Success;
         if (result.PersistenceWasDetected)
         {
-            StatusInfoBar.Title = "Isolamento e persistência confirmados";
-            StatusInfoBar.Message = $"{result.Profiles.Count} perfis recuperaram valores distintos da execução anterior.";
+            StatusInfoBar.Title = AppText.Get("Diagnostics_IsolationPersistenceTitle");
+            StatusInfoBar.Message = AppText.Format(
+                "Diagnostics_IsolationPersistenceMessage",
+                result.Profiles.Count);
             return;
         }
 
-        StatusInfoBar.Title = "Isolamento confirmado nesta execução";
-        StatusInfoBar.Message = $"Reinicie o aplicativo para confirmar também a persistência dos {result.Profiles.Count} perfis.";
+        StatusInfoBar.Title = AppText.Get("Diagnostics_IsolationCurrentRunTitle");
+        StatusInfoBar.Message = AppText.Format(
+            "Diagnostics_IsolationCurrentRunMessage",
+            result.Profiles.Count);
     }
 
     private void UpdateSelectedProfileStatus()
@@ -1571,10 +1606,29 @@ public sealed partial class MainPage : Page
         }
 
         ServiceTitleText.Text = SelectedRailItem()?.Tile.Name ?? "Syltr";
-        var title = string.IsNullOrWhiteSpace(state.DocumentTitle) ? "sem título" : state.DocumentTitle;
-        ProfileStatusText.Text =
-            $"{host.ProfileName} · {state.Status} · {title} · não lidos: {state.UnreadCount}";
+        var title = string.IsNullOrWhiteSpace(state.DocumentTitle)
+            ? AppText.Get("ProfileStatus_Untitled")
+            : state.DocumentTitle;
+        ProfileStatusText.Text = AppText.Format(
+            "ProfileStatus_Summary",
+            host.ProfileName,
+            LocalizeServiceViewStatus(state.Status),
+            title,
+            state.UnreadCount);
     }
+
+    private static string LocalizeServiceViewStatus(ServiceViewStatus status) => status switch
+    {
+        ServiceViewStatus.Created => AppText.Get("ProfileStatus_Created"),
+        ServiceViewStatus.Initializing => AppText.Get("ProfileStatus_Initializing"),
+        ServiceViewStatus.Ready => AppText.Get("ProfileStatus_Ready"),
+        ServiceViewStatus.Navigating => AppText.Get("ProfileStatus_Navigating"),
+        ServiceViewStatus.Recovering => AppText.Get("ProfileStatus_Recovering"),
+        ServiceViewStatus.Failed => AppText.Get("ProfileStatus_Failed"),
+        ServiceViewStatus.Disabled => AppText.Get("ProfileStatus_Disabled"),
+        ServiceViewStatus.Closed => AppText.Get("ProfileStatus_Closed"),
+        _ => status.ToString()
+    };
 
     private void UpdateServiceOverlay()
     {
@@ -1918,7 +1972,7 @@ public sealed partial class MainPage : Page
         public void RefreshDisplayName()
         {
             DisplayName = Items.Count > 1
-                ? $"{ActiveItem.Tile.Name} · {Items.Count} instâncias"
+                ? AppText.Format("ServiceGroup_DisplayName", ActiveItem.Tile.Name, Items.Count)
                 : ActiveItem.Tile.Name;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StackVisibility)));
         }

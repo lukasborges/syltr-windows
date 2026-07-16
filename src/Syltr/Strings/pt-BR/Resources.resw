@@ -104,4 +104,75 @@
   <data name="Category_Tasks" xml:space="preserve"><value>Tarefas</value></data>
   <data name="Category_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
   <data name="Category_AI" xml:space="preserve"><value>Inteligência artificial</value></data>
+  <data name="ServiceRail_AutomationName" xml:space="preserve"><value>Serviços</value></data>
+  <data name="Diagnostics_LocalTarget" xml:space="preserve"><value>Diagnóstico local</value></data>
+  <data name="Status_InitializingServices" xml:space="preserve"><value>Inicializando os serviços…</value></data>
+  <data name="Status_NoServicesTitle" xml:space="preserve"><value>Nenhum serviço configurado</value></data>
+  <data name="Status_NoServicesMessage" xml:space="preserve"><value>Adicione um serviço para começar.</value></data>
+  <data name="Diagnostics_InsufficientProfilesTitle" xml:space="preserve"><value>Perfis insuficientes</value></data>
+  <data name="Diagnostics_InsufficientProfilesMessage" xml:space="preserve"><value>São necessários ao menos dois perfis funcionais para comprovar isolamento.</value></data>
+  <data name="Status_SomeProfilesFailedTitle" xml:space="preserve"><value>Alguns perfis falharam</value></data>
+  <data name="Status_SomeProfilesFailedMessage" xml:space="preserve"><value>{0} de {1} perfis ativos iniciaram. Use Recuperar nas abas com falha.</value></data>
+  <data name="Status_WebViewInitializationFailedTitle" xml:space="preserve"><value>Falha ao iniciar WebView2</value></data>
+  <data name="Status_WebViewInitializationFailedMessage" xml:space="preserve"><value>{0} Diagnóstico: {1}</value></data>
+  <data name="Notifications_MutedTitle" xml:space="preserve"><value>Notificações silenciadas</value></data>
+  <data name="Notifications_UnmutedTitle" xml:space="preserve"><value>Notificações reativadas</value></data>
+  <data name="Service_DisabledTitle" xml:space="preserve"><value>Serviço desativado</value></data>
+  <data name="Service_EnabledTitle" xml:space="preserve"><value>Serviço ativado</value></data>
+  <data name="Service_DisabledSessionPreserved" xml:space="preserve"><value>A sessão permanece salva e pode ser reativada pelo mesmo menu.</value></data>
+  <data name="Service_UpdatedTitle" xml:space="preserve"><value>{0} atualizado</value></data>
+  <data name="Service_UpdatedDisabledMessage" xml:space="preserve"><value>{0} foi desativado; sua sessão permanece salva.</value></data>
+  <data name="Service_UpdatedSessionPreservedMessage" xml:space="preserve"><value>A sessão de {0} foi preservada e abriu o endereço configurado.</value></data>
+  <data name="Recovery_NotRequiredTitle" xml:space="preserve"><value>Recuperação não necessária</value></data>
+  <data name="Recovery_NotRequiredMessage" xml:space="preserve"><value>O serviço selecionado não está em estado de falha.</value></data>
+  <data name="Recovery_CompletedTitle" xml:space="preserve"><value>Perfil recuperado</value></data>
+  <data name="Recovery_CompletedMessage" xml:space="preserve"><value>{0} foi recriado usando a mesma sessão persistente.</value></data>
+  <data name="Recovery_FailedTitle" xml:space="preserve"><value>Falha na recuperação</value></data>
+  <data name="Memory_ProcessGroup" xml:space="preserve"><value>{0}: {1} processos, {2}</value></data>
+  <data name="Memory_Title" xml:space="preserve"><value>Memória WebView2 · serviços: {0}</value></data>
+  <data name="Memory_Content" xml:space="preserve"><value>Working set: {0}&#xA;Memória privada: {1}&#xA;Processos: {2}&#xA;&#xA;{3}</value></data>
+  <data name="Memory_FailedTitle" xml:space="preserve"><value>Não foi possível medir a memória</value></data>
+  <data name="WindowsNotification_UnavailableTitle" xml:space="preserve"><value>Notificações do Windows indisponíveis</value></data>
+  <data name="WindowsNotification_RegistrationIncomplete" xml:space="preserve"><value>O registro não foi concluído.</value></data>
+  <data name="WindowsNotification_TestTitle" xml:space="preserve"><value>Teste do Syltr</value></data>
+  <data name="WindowsNotification_TestBody" xml:space="preserve"><value>A ponte nativa está funcionando para {0}.</value></data>
+  <data name="WindowsNotification_SentTitle" xml:space="preserve"><value>Notificação enviada ao Windows</value></data>
+  <data name="WindowsNotification_SentMessage" xml:space="preserve"><value>Clique nela para confirmar a ativação do perfil de origem.</value></data>
+  <data name="WindowsNotification_FailedTitle" xml:space="preserve"><value>Falha ao enviar notificação</value></data>
+  <data name="Diagnostics_AuthenticationTitle" xml:space="preserve"><value>Teste de autenticação</value></data>
+  <data name="Diagnostics_AuthenticationMessage" xml:space="preserve"><value>Cada aba usa um perfil persistente diferente. Faça login com contas distintas para validar a separação.</value></data>
+  <data name="ExternalLink_FailedTitle" xml:space="preserve"><value>Não foi possível abrir o link</value></data>
+  <data name="Notification_OpenService" xml:space="preserve"><value>Abrir serviço</value></data>
+  <data name="Notification_FallbackMessage" xml:space="preserve"><value>Notificação de {0} · {1}</value></data>
+  <data name="Notification_BodyWithProfile" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="DoNotDisturb_EnabledTitle" xml:space="preserve"><value>Não perturbe ativado</value></data>
+  <data name="DoNotDisturb_DisabledTitle" xml:space="preserve"><value>Não perturbe desativado</value></data>
+  <data name="DoNotDisturb_EnabledMessage" xml:space="preserve"><value>Notificações web serão dispensadas até você desativar este modo.</value></data>
+  <data name="DoNotDisturb_DisabledMessage" xml:space="preserve"><value>Notificações dos serviços não silenciados voltarão a aparecer.</value></data>
+  <data name="Download_InProgressTitle" xml:space="preserve"><value>Baixando {0}</value></data>
+  <data name="Download_SourceMessage" xml:space="preserve"><value>Perfil {0} · {1}</value></data>
+  <data name="Download_CancelledTitle" xml:space="preserve"><value>Download cancelado</value></data>
+  <data name="Download_CompletedTitle" xml:space="preserve"><value>Download concluído: {0}</value></data>
+  <data name="Download_CompletedNotificationTitle" xml:space="preserve"><value>Download concluído</value></data>
+  <data name="Download_InterruptedTitle" xml:space="preserve"><value>Download interrompido: {0}</value></data>
+  <data name="Download_InterruptedMessage" xml:space="preserve"><value>O navegador interrompeu o download.</value></data>
+  <data name="Download_ProgressKnown" xml:space="preserve"><value>{0} de {1} · {2}</value></data>
+  <data name="Download_ProgressUnknown" xml:space="preserve"><value>{0} recebidos · {1}</value></data>
+  <data name="Diagnostics_IsolationFailedTitle" xml:space="preserve"><value>Falha no isolamento</value></data>
+  <data name="Diagnostics_IsolationFailedMessage" xml:space="preserve"><value>Os perfis não mantiveram valores de armazenamento distintos.</value></data>
+  <data name="Diagnostics_IsolationPersistenceTitle" xml:space="preserve"><value>Isolamento e persistência confirmados</value></data>
+  <data name="Diagnostics_IsolationPersistenceMessage" xml:space="preserve"><value>{0} perfis recuperaram valores distintos da execução anterior.</value></data>
+  <data name="Diagnostics_IsolationCurrentRunTitle" xml:space="preserve"><value>Isolamento confirmado nesta execução</value></data>
+  <data name="Diagnostics_IsolationCurrentRunMessage" xml:space="preserve"><value>Reinicie o aplicativo para confirmar também a persistência dos {0} perfis.</value></data>
+  <data name="ProfileStatus_Untitled" xml:space="preserve"><value>sem título</value></data>
+  <data name="ProfileStatus_Summary" xml:space="preserve"><value>{0} · {1} · {2} · não lidos: {3}</value></data>
+  <data name="ProfileStatus_Created" xml:space="preserve"><value>criado</value></data>
+  <data name="ProfileStatus_Initializing" xml:space="preserve"><value>inicializando</value></data>
+  <data name="ProfileStatus_Ready" xml:space="preserve"><value>pronto</value></data>
+  <data name="ProfileStatus_Navigating" xml:space="preserve"><value>navegando</value></data>
+  <data name="ProfileStatus_Recovering" xml:space="preserve"><value>recuperando</value></data>
+  <data name="ProfileStatus_Failed" xml:space="preserve"><value>falhou</value></data>
+  <data name="ProfileStatus_Disabled" xml:space="preserve"><value>desativado</value></data>
+  <data name="ProfileStatus_Closed" xml:space="preserve"><value>fechado</value></data>
+  <data name="ServiceGroup_DisplayName" xml:space="preserve"><value>{0} · {1} instâncias</value></data>
 </root>

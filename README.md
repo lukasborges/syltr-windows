@@ -305,7 +305,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
 - [ ] Debug console capture and diagnostics.
 - [ ] Configuration import from the Linux application.
-- [ ] Portuguese and English resources (foundation and primary workflows implemented).
+- [x] Portuguese and English resources across the application UI.
 - [ ] Accessibility review and full keyboard navigation.
 
 ### Phase 5 — Hardening and distribution
@@ -543,4 +543,4 @@ Service names and logos may be trademarks of their respective owners. Before dis
 3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
 4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
 5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
-6. Port localized resources module by module.
+6. Implement compatible import of the Linux `services.json` configuration.
