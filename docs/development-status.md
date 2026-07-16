@@ -11,7 +11,7 @@ Windows. A auditoria detalhada de paridade continua em
 - O aplicativo compila em Debug sem avisos ou erros.
 - O aplicativo compila em Release sem avisos ou erros e o script
   `scripts/build-msix.ps1` gera um MSIX x64 não assinado.
-- A suíte possui 126 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 128 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -55,6 +55,11 @@ Windows. A auditoria detalhada de paridade continua em
   candidatura ao SignPath Foundation.
 - Candidatura ao SignPath Foundation enviada em 16 de julho de 2026; aguardando
   análise, publisher e identificadores de integração.
+- Instalação local do MSIX `0.1.0.0` validada com certificado de desenvolvimento
+  não exportável em `LocalMachine\TrustedPeople`; assinatura válida e execução
+  confirmada a partir de `C:\Program Files\WindowsApps`.
+- Assets placeholder do template WinUI substituídos pelo ícone do Syltr em todos
+  os tamanhos de pacote, barra de tarefas, executável, Store e splash screen.
 
 ## Decisões visuais aprovadas
 

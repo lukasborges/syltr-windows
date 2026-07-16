@@ -63,6 +63,41 @@ public sealed class PackagingSourceTests
         Assert.Contains("PRIVACY.md", policy, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Local_installer_uses_a_non_exportable_machine_trusted_certificate()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "scripts", "install-local-msix.ps1"));
+
+        Assert.Contains("-KeyExportPolicy NonExportable", script, StringComparison.Ordinal);
+        Assert.Contains("StoreLocation]::LocalMachine", script, StringComparison.Ordinal);
+        Assert.Contains("StoreName]::TrustedPeople", script, StringComparison.Ordinal);
+        Assert.Contains("Get-AuthenticodeSignature", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("TrustedRoot", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Package_icons_are_generated_from_the_syltr_artwork()
+    {
+        var root = FindRepositoryRoot();
+        var project = File.ReadAllText(Path.Combine(root, "src", "Syltr", "Syltr.csproj"));
+        var generator = File.ReadAllText(Path.Combine(root, "scripts", "generate-app-assets.ps1"));
+        var iconPath = Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Assets",
+            "Square44x44Logo.targetsize-24_altform-unplated.png");
+        const string templateHash =
+            "E7AA3D860CE3D95E7EC17F82C65295BACE2A09B56F0B94290B635F65375CEF87";
+
+        Assert.Contains("<ApplicationIcon>Assets\\AppIcon.ico</ApplicationIcon>", project);
+        Assert.Contains("Syltr.svg", generator, StringComparison.Ordinal);
+        Assert.NotEqual(
+            templateHash,
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(iconPath))));
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

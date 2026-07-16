@@ -465,6 +465,30 @@ Machines without the Visual C++ UWP symbol tools may report that
 `mspdbcmf.exe` is unavailable; this skips only the optional symbol package and
 does not prevent MSIX generation.
 
+For a local installation on the developer's own Windows account, generate a
+self-signed test package with:
+
+```powershell
+.\scripts\install-local-msix.ps1 -Launch
+```
+
+The script creates a non-exportable development certificate in the current
+user's certificate store, requests elevation to trust its public certificate
+under the local machine's `TrustedPeople` store, signs a copy below the ignored
+`artifacts\local` directory and installs the package. This build is for local
+testing only and must be uninstalled before installing a future public package
+whose publisher is assigned by SignPath Foundation.
+
+Package and executable icons are generated from `Assets\Syltr.svg`. After
+changing the source artwork, regenerate every Windows-required size with:
+
+```powershell
+.\scripts\generate-app-assets.ps1
+```
+
+The generator uses the installed Microsoft Edge SVG renderer and preserves
+transparent backgrounds for unplated taskbar, Start and Store assets.
+
 GitHub Releases is the selected public distribution and update channel. The
 manual release-candidate workflow currently uploads an unsigned artifact only;
 it cannot publish a release. See [`docs/distribution.md`](docs/distribution.md)
