@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Syltr.Core/Syltr.Core.csproj" />
+    <Project Path="src/Syltr.Infrastructure/Syltr.Infrastructure.csproj" />
+    <Project Path="src/Syltr.Web/Syltr.Web.csproj" />
+    <Project Path="src/Syltr.Windows/Syltr.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Syltr.Core.Tests/Syltr.Core.Tests.csproj" />
+  </Folder>
+</Solution>

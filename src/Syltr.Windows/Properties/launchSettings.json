@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Syltr.Windows (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Syltr.Windows (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
