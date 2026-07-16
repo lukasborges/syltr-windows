@@ -1,623 +1,89 @@
 # Syltr for Windows
 
-Native Windows version of **Syltr**, an all-in-one desktop application for web-based messaging, email, calendar, task and AI services.
-
-The application hosts services such as WhatsApp Web, Telegram, Slack, Discord, Teams, Gmail and others in a single native Windows window. Every configured service instance must have an isolated browser profile, allowing multiple accounts of the same service to remain logged in independently.
-
-## Reference implementation and parity goal
-
-The reference project is [lukasborges/syltr](https://github.com/lukasborges/syltr), the original native Linux/GNOME implementation.
-
-This repository aims to be a nearly faithful Windows-native version of that project. It should preserve the same features, product behavior and overall project structure wherever practical, including the separation between the application shell, web engine, configuration, catalog and domain rules. Platform-specific code is adapted to Windows APIs, WinUI 3 and WebView2 so the application follows native Windows conventions without changing the core Syltr experience.
-
-## Project status
-
-The repository currently contains a working native MVP and WebView2 diagnostic tooling:
-
-- .NET 10;
-- WinUI 3 and Windows App SDK 2.2;
-- WebView2 through Windows App SDK;
-- MSIX packaging support;
-- a single `Syltr` application project organized by the same responsibilities as the Linux project;
-- an xUnit test project with an architecture test enforcing the module layout;
-- successful Debug build with zero warnings and zero errors;
-- normalized `Syltr` assembly, namespaces and application titles.
-
-The service and settings domain models, static catalog, atomic configuration persistence and unread-count parsing are ported with unit tests. The WebView2 spike now proves isolated persistent storage, same-profile popups and isolated profile deletion. Native permission routing is implemented and ready for visual device testing.
-
-## Product vision
-
-Syltr for Windows should provide a Windows-native shell around web services while preserving the strengths of the original application:
-
-- a compact service rail;
-- multiple service instances and accounts;
-- isolated persistent sessions;
-- grouped instances of the same service;
-- real favicons and unread badges;
-- native Windows notifications;
-- per-service mute and global do-not-disturb;
-- downloads integrated with the Windows Downloads folder;
-- safe handling of external links, OAuth and SSO popups;
-- keyboard shortcuts and accessible native controls;
-- persisted settings and service ordering;
-- recovery from WebView process failures.
-
-“Native Windows” means that the window, navigation, menus, dialogs, notifications, shortcuts, storage and operating-system integrations use Windows APIs and WinUI 3. The hosted services themselves remain web applications rendered by WebView2.
-
-## Why this is a separate implementation
-
-The original Syltr uses Rust, GTK4, libadwaita and WebKitGTK 6. Its architecture is clean, but most implementation code is coupled to GNOME or WebKitGTK APIs. Replacing only the graphical layer while keeping Rust would require significant Win32/COM/XAML integration and would reuse relatively little code.
-
-The Windows version therefore uses C# and WinUI 3. Concepts, behavior, data formats, tests, assets and selected JavaScript can be migrated, but platform-specific code will be rewritten against WebView2 and Windows App SDK.
-
-We intentionally do not introduce a Rust/.NET FFI boundary in the initial implementation. A shared native core should only be reconsidered if substantial cross-platform domain logic emerges later.
-
-## Repository structure
-
-```text
-syltr-windows/
-├── Syltr.slnx
-├── src/
-│   └── Syltr/
-│       ├── App.xaml             Application startup and resources
-│       ├── Catalog/             Known service recipes
-│       ├── Config/              Service models, settings and persistence
-│       ├── Engine/              WebView2 sessions and browser integrations
-│       │   ├── Unread/          Unread-count detection and parsing
-│       │   ├── UserAgent/       Per-service user-agent rules
-│       │   └── WebAppScripts/   Service-specific compatibility scripts
-│       ├── Icon/                Service icons, favicons and unread badges
-│       ├── Spellcheck/          Spell-check integration
-│       ├── Window/              Native window, rail, actions and dialogs
-│       ├── Assets/              Windows application and package assets
-│       └── Syltr.csproj         WinUI 3 application and MSIX package
-└── tests/
-    └── Syltr.Tests/             Unit tests for ported behavior
-```
-
-### Structure parity with Linux
-
-The source tree deliberately mirrors the modules in [lukasborges/syltr](https://github.com/lukasborges/syltr):
-
-| Linux reference | Windows equivalent | Responsibility |
-| --- | --- | --- |
-| `src/main.rs` | `src/Syltr/App.xaml(.cs)` | Startup, lifecycle and application resources |
-| `src/window/` | `src/Syltr/Window/` | Window, rail, actions, dialogs and native controls |
-| `src/engine/` | `src/Syltr/Engine/` | WebView2 sessions, scripts, favicons, unread state and downloads |
-| `src/config/` | `src/Syltr/Config/` | Service definitions, settings, persistence and application data paths |
-| `src/catalog.rs` | `src/Syltr/Catalog/` | Catalog of known services |
-| `src/icon.rs` | `src/Syltr/Icon/` | Service tile, favicon and unread badge behavior |
-| `src/spellcheck.rs` | `src/Syltr/Spellcheck/` | Platform spell-check integration |
-
-This mapping is an architecture contract for the delivery plan. New functionality should first be located in the equivalent reference module, then implemented in its Windows counterpart. A structural divergence is allowed only when required by .NET, WinUI 3, WebView2 or MSIX, and the reason must be documented here. `Assets` and the package manifests remain inside the WinUI project because Windows packaging tooling expects them there.
-
-Module boundaries are enforced through namespaces and public abstractions. `Window` must not manipulate `CoreWebView2` directly; browser-specific behavior belongs behind the public API exposed by `Engine`.
-
-## Planned architecture
-
-### `Catalog` and `Config`
-
-These modules own stable product concepts and rules:
-
-- `ServiceDefinition`: id, name, URL, mute, disabled state and optional user-agent;
-- `ServiceCatalogEntry` and catalog categories;
-- service ID generation and slug normalization;
-- URL normalization and validation;
-- grouping multiple instances of the same service;
-- unread-count parsing;
-- application settings that do not depend on Windows;
-- interfaces implemented by infrastructure where useful.
-
-Domain behavior should be covered by unit tests before it is connected to WinUI.
-
-`Config` also owns persistence and platform storage services:
-
-- JSON service and settings stores;
-- atomic writes and graceful handling of corrupted files;
-- application data paths under Windows local application data;
-- Downloads folder resolution and collision-free file naming;
-- native app notifications through Windows App SDK;
-- logging and diagnostics abstractions.
-
-The persistence schema remains compatible with the original `services.json`,
-but the Windows interface does not expose a Linux configuration importer. This
-keeps the main menu aligned with the Linux application and avoids presenting a
-migration tool as an end-user feature.
-
-### `Engine`
-
-This module will expose a browser abstraction tentatively named `ServiceViewHost`:
-
-```text
-InitializeAsync
-NavigateHome
-Reload
-GoBack
-GoForward
-SetMuted
-SetUserAgent
-UnreadCount
-Favicon
-Dispose
-```
-
-The exact API will evolve during the spike, but consumers must not depend on WebView2 event types.
-
-Responsibilities include:
-
-- creation and lifetime of the shared `CoreWebView2Environment`;
-- one isolated WebView2 profile per service instance;
-- navigation and process-failure recovery;
-- permission policy;
-- external link and popup handling;
-- downloads;
-- favicon discovery;
-- unread detection;
-- notification capture;
-- user-agent configuration;
-- script injection and the JavaScript/native message bridge;
-- debug console forwarding when enabled.
-
-### `Window`
-
-This module owns the native user experience:
-
-- main window and title bar;
-- service rail and grouped instance chooser;
-- content host for service views;
-- add/edit/remove dialogs;
-- context menus and drag-and-drop ordering;
-- keyboard shortcuts;
-- settings and about UI;
-- empty, loading, error and disabled states;
-- activation from a Windows notification;
-- application lifecycle and MSIX manifest.
-
-### `Icon` and `Spellcheck`
-
-`Icon` owns the reusable visual behavior for service tiles, favicons, grouping and unread badges. `Spellcheck` owns Windows-specific spell-check discovery and configuration. These responsibilities remain separate to preserve the same boundaries as the Linux reference project.
-
-## Browser profile strategy
-
-The preferred design is:
-
-1. Create one shared `CoreWebView2Environment` in a writable folder under local application data.
-2. Create one stable WebView2 profile for every service instance.
-3. Use the persisted service ID as the profile name, for example `whatsapp`, `whatsapp-2` or `teams-work`.
-4. Reuse the same environment and profile for OAuth/SSO popup WebViews opened by that service.
-5. Explicitly close WebView controls and release browser resources when an instance is removed.
-
-Multiple profiles under one user data folder should isolate cookies, storage, cache, permissions and preferences while allowing WebView2 to share runtime processes. This assumption must be proven by the spike before the rest of the UI is built.
-
-## Migration map from the original project
-
-| Original area | Windows strategy |
-| --- | --- |
-| Service model and JSON schema | Port to C# and keep compatible where practical |
-| Static catalog and categories | Port data, preferably to an embedded JSON resource |
-| URL normalization | Port with equivalent tests |
-| Service ID generation | Port with equivalent tests |
-| Unread parsing from page title | Port with equivalent tests |
-| Per-service user-agent rules | Port, then retest against Chromium |
-| Service grouping and ordering | Port domain behavior; rebuild UI in WinUI |
-| GTK/libadwaita window and dialogs | Rewrite in XAML/WinUI 3 |
-| WebKitGTK `ServiceView` | Rewrite as WebView2 `ServiceViewHost` |
-| Per-session WebKit data directories | Replace with WebView2 multiple profiles |
-| GIO notifications | Replace with `AppNotificationManager` |
-| XDG config/data paths | Replace with Windows local application data |
-| XDG Downloads lookup | Replace with Windows known-folder APIs |
-| Favicon JavaScript | Adapt bridge to `window.chrome.webview.postMessage` |
-| Web notification shim | Prefer native WebView2 APIs; keep a tested service-worker fallback if needed |
-| WebKit media workarounds | Do not port unless Chromium testing demonstrates a need |
-| MPRIS/PipeWire workarounds | Remove; Linux-specific |
-| Hunspell system discovery | Replace with WebView2's Windows-managed dictionaries and a shortcut to system language settings |
-| SVG service assets and translations | Reuse after license and rendering review |
-
-Linux/WebKit workarounds must never be copied blindly. Every compatibility script should have a documented failing service, a test procedure and a removal condition.
-
-## Delivery plan
-
-The implementation order follows the module map above. Each porting task starts from the behavior and tests in the matching Linux module, preserves its public responsibilities and then adapts only the platform-specific implementation. Phase reviews must verify both feature parity and structural parity before moving forward.
-
-### Phase 0 — Foundation
-
-Status: **complete for the development foundation**
-
-- [x] Create an independent Git repository.
-- [x] Create the WinUI 3/MSIX application.
-- [x] Create the WinUI application and xUnit test projects.
-- [x] Align source modules with the Linux reference structure.
-- [x] Validate Debug build and test execution.
-- [x] Replace template namespaces, titles and placeholder classes.
-- [x] Add repository documentation, formatting rules and CI.
-- [x] Add the initial application icon and licensing files.
-
-### Phase 1 — Domain and persistence
-
-- [x] Port `ServiceDefinition` and settings models into `Config`.
-- [x] Port ID generation and URL normalization into `Config`.
-- [x] Port unread parsing into `Engine`.
-- [x] Port the service catalog into `Catalog`.
-- [x] Add JSON serialization compatibility tests.
-- [x] Implement atomic service/settings persistence.
-- [x] Define local application data paths.
-- [x] Add an explicit schema/version migration strategy.
-
-Exit criterion: catalog and service configuration can be created, saved, loaded and tested without WinUI or WebView2.
-
-### Phase 2 — WebView2 isolation spike
-
-This is the most important technical gate.
-
-Status: **profile isolation and the primary authentication flow proven**. Three
-named profiles have been validated against the same origin across an
-application restart. See
-[`docs/architecture/0002-webview2-profile-isolation-spike.md`](docs/architecture/0002-webview2-profile-isolation-spike.md).
-The real Google Chat → Google → corporate SSO flow was validated by the user in
-the originating profile. Broader multi-account and Microsoft validation remains
-part of the continuous compatibility matrix.
-Camera, microphone, geolocation, notification and clipboard requests now pass
-through a native per-origin/per-profile confirmation dialog; validation on real
-devices and services is still pending.
-Downloads are routed to the Windows known Downloads folder with sanitized,
-collision-free names and native progress feedback. Web notifications are
-captured behind the Engine abstraction and can be forwarded to Windows App SDK
-app notifications; end-to-end runtime validation of normal and service-worker
-notifications remains pending.
-
-- [x] Create a shared WebView2 environment with an explicit user data folder.
-- [x] Create at least three simultaneous profiles.
-- [ ] Prove two independent logins to the same service.
-- [ ] Prove that closing and reopening the app preserves both sessions.
-- [x] Prove that removing one profile does not affect another.
-- [ ] Validate Google and Microsoft authentication.
-- [ ] Validate OAuth/SSO popup handling within the originating profile.
-- [ ] Validate normal and service-worker notifications.
-- [ ] Validate upload, download and clipboard image paste.
-- [ ] Validate audio, video, microphone and camera permissions.
-- [ ] Measure memory with 5, 10 and 20 loaded services.
-- [ ] Validate crash/process-failure recovery.
-
-Exit criterion: profile isolation, authentication and the critical WebView integrations work reliably enough to support the product.
-
-If WinUI 3 hosting exposes a blocking limitation, the platform-independent behavior in `Config` and `Catalog` should remain unchanged while the host is evaluated in WPF + WebView2. This is a fallback decision, not the default plan.
-
-### Phase 3 — Minimum viable product
-
-- [x] Implement the native window and compact service rail.
-- [x] Add services from the catalog or a custom URL.
-- [x] Add, edit, remove, disable and reorder services.
-- [x] Group multiple instances of the same service.
-- [x] Host and switch between persistent service views.
-- [x] Implement back, forward, home and reload.
-- [x] Open user-clicked external links in the default browser.
-- [x] Keep OAuth/SSO navigation in the appropriate in-app popup.
-- [x] Display favicon and unread badge.
-- [x] Add loading, empty, disabled and error states.
-- [x] Implement the original keyboard shortcuts where they fit Windows conventions.
-
-Exit criterion: a user can configure multiple services/accounts, restart the app and use them reliably.
-
-### Phase 4 — Feature parity
-
-- [x] Native notifications with per-service mute.
-- [x] Global do-not-disturb.
-- [x] Notification activation that selects the correct service.
-- [x] Downloads to the Windows Downloads folder.
-- [x] Collision-free download filenames and completion notification.
-- [x] Custom user-agent per service.
-- [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
-- [x] Opt-in debug console capture and diagnostics.
-- [x] Portuguese and English resources across the application UI.
-- [ ] Accessibility review and full keyboard navigation (implementation complete; Narrator/high-contrast runtime pass pending).
-
-### Phase 5 — Hardening and distribution
-
-- [ ] Automated test matrix for core services.
-- [x] CI build and tests for pull requests.
-- [x] Release build and MSIX generation (unsigned x64 artifact validated locally).
-- [x] GitHub Releases selected as the installer/update channel; internal release-candidate workflow prepared.
-- [ ] Package identity, publisher and signing strategy.
-- [ ] WebView2 Evergreen prerequisite handling.
-- [ ] x64 release first; ARM64 after validation.
-- [ ] Upgrade and uninstall behavior.
-- [x] Privacy, telemetry and diagnostic policy.
-- [x] License and third-party notices.
-- [ ] Beta release and feedback loop.
-
-## Compatibility test matrix
-
-Every supported service should be tested for the following behaviors where applicable:
-
-- initial load and login;
-- session persistence after restart;
-- multiple isolated accounts;
-- OAuth/SSO popup flow;
-- sending and receiving messages;
-- unread badge updates;
-- native notifications, including service-worker notifications;
-- notification click behavior;
-- file upload and download;
-- clipboard text and image paste;
-- audio playback and recording;
-- video playback;
-- microphone and camera permissions;
-- external links;
-- custom protocols and deep links;
-- context menu and spell checking;
-- behavior after a WebView process failure.
-
-The initial high-priority matrix is:
-
-1. WhatsApp Web;
-2. Microsoft Teams;
-3. Slack;
-4. Discord;
-5. Telegram Web;
-6. Gmail/Google authentication;
-7. Outlook/Microsoft authentication;
-8. one custom URL service.
-
-Website compatibility is a continuous product responsibility because hosted services can change independently of Syltr releases.
-
-## Resource and lifecycle policy
-
-The original application loads every enabled service so that unread counts and notifications continue in the background. The Windows version should initially preserve that behavior for parity, then measure its cost.
-
-Possible later optimization:
-
-- keep all services loaded by default;
-- expose an optional “sleep inactive services” mode;
-- clearly communicate that sleeping may delay unread counts and notifications;
-- use measured memory thresholds rather than arbitrary eviction;
-- never destroy browser data when merely suspending a view.
-
-## Security and privacy principles
-
-- Treat all hosted web content as untrusted.
-- Keep service profiles isolated.
-- Do not expose arbitrary native APIs to JavaScript.
-- Validate every message received through the WebView bridge.
-- Restrict privileged actions to known message shapes and expected origins.
-- Avoid logging message contents, tokens, cookies or authentication URLs.
-- Open external navigation with explicit, testable policy.
-- Request camera, microphone and notification permissions intentionally.
-- Prefer the Evergreen WebView2 runtime for security updates.
-- Do not add telemetry without an explicit product decision and documentation.
-
-## Project policies
-
-- [Privacy policy](PRIVACY.md)
-- [Security policy](SECURITY.md)
-- [Code signing policy](CODE_SIGNING_POLICY.md)
-
-The code-signing service is pending SignPath Foundation acceptance. Until the
-trusted certificate and exact publisher are assigned, GitHub Actions produces
-only internal unsigned candidates and no installable public release.
-
-## Uninstallation
-
-Remove Syltr from **Settings → Apps → Installed apps → Syltr → Uninstall**.
-Because profiles and configuration are stored outside the installation folder,
-users who also want to erase saved sessions can close Syltr and remove
-`%LOCALAPPDATA%\Syltr` after uninstalling. This permanently removes configured
-services, cookies, browser profiles and diagnostic logs.
-
-## Data locations and migration
-
-The final paths will be centralized in `Syltr.Config`. The intended categories are:
-
-```text
-Local application data
-├── config/
-│   ├── services.json
-│   └── settings.json
-├── webview/                 Shared WebView2 user data folder
-├── logs/                    Diagnostic logs, if enabled
-└── migrations/              Optional migration state
-```
-
-Requirements:
-
-- never store mutable data beside the executable;
-- keep browser data separate from human-readable configuration;
-- use atomic replacement for JSON writes;
-- tolerate missing optional fields;
-- back up configuration before a destructive schema migration;
-- deleting a service profile must require an intentional product action.
-
-With `SYLTR_DEBUG=1`, WebView2 console messages are stored locally in
-`logs/web-console.jsonl`; capture is disabled otherwise. Entries keep only the
-source origin (not paths or query strings), truncate messages at 4 KiB and
-rotate at 2 MiB. Hosted pages control console text, so debug logs may still
-contain account or application data and should be reviewed before sharing.
+An all-in-one desktop application for web-based messaging, email, calendar,
+task and AI services, native to **Windows**. It brings services such as WhatsApp
+Web, Telegram, Slack, Discord, Teams and Gmail into a single window, each with
+its own isolated session for cookies and storage.
+
+This is the Windows counterpart of the original
+[Syltr for Linux](https://github.com/lukasborges/syltr), adapted to Windows APIs
+and native interface conventions.
+
+**Stack:** C# · .NET 10 · WinUI 3 · Windows App SDK · WebView2
 
 ## Development
 
 ### Requirements
 
-- Windows 10 version 1809 or later; Windows 11 is recommended for development;
-- .NET 10 SDK;
-- Developer Mode enabled for local packaged-app execution;
-- WebView2 Evergreen Runtime;
-- Visual Studio with WinUI tooling is optional but recommended for XAML work.
+- Windows 10 version 1809 or later;
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0);
+- [WebView2 Evergreen Runtime](https://developer.microsoft.com/microsoft-edge/webview2/);
+- Windows Developer Mode for packaged execution;
+- Visual Studio with WinUI tooling is optional, but recommended for XAML work.
 
-### Build
+Restore dependencies and build the solution:
 
 ```powershell
 dotnet restore Syltr.slnx
 dotnet build Syltr.slnx -c Debug
 ```
 
-### Release package
-
-Generate the currently validated x64 MSIX with:
-
-```powershell
-.\scripts\build-msix.ps1
-```
-
-The local package is intentionally unsigned while the final package identity,
-publisher and certificate strategy remain open. Windows requires an MSIX to be
-signed with a certificate trusted by the target machine before installation.
-The package is written below `src\Syltr\AppPackages`, which is ignored by Git.
-Machines without the Visual C++ UWP symbol tools may report that
-`mspdbcmf.exe` is unavailable; this skips only the optional symbol package and
-does not prevent MSIX generation.
-
-For a local installation on the developer's own Windows account, generate a
-self-signed test package with:
-
-```powershell
-.\scripts\install-local-msix.ps1 -Launch
-```
-
-The script creates a non-exportable development certificate in the current
-user's certificate store, requests elevation to trust its public certificate
-under the local machine's `TrustedPeople` store, signs a copy below the ignored
-`artifacts\local` directory and installs the package. This build is for local
-testing only and must be uninstalled before installing a future public package
-whose publisher is assigned by SignPath Foundation.
-
-Package and executable icons are generated from `Assets\Syltr.svg`. After
-changing the source artwork, regenerate every Windows-required size with:
-
-```powershell
-.\scripts\generate-app-assets.ps1
-```
-
-The generator uses the installed Microsoft Edge SVG renderer and preserves
-transparent backgrounds for unplated taskbar, Start and Store assets.
-
-GitHub Releases is the selected public distribution and update channel. The
-manual release-candidate workflow currently uploads an unsigned artifact only;
-it cannot publish a release. See [`docs/distribution.md`](docs/distribution.md)
-for the stable asset names, App Installer flow and signing gate. The privacy
-policy is available in [`PRIVACY.md`](PRIVACY.md). SignPath application
-readiness and the remaining external steps are tracked in
-[`docs/signpath-readiness.md`](docs/signpath-readiness.md).
-
-### Test
-
-```powershell
-dotnet test Syltr.slnx -c Debug
-```
-
-### Run
+Run the application:
 
 ```powershell
 dotnet run --project src/Syltr/Syltr.csproj
 ```
 
-The application is configured for packaged execution with debug identity support. Distribution packaging and signing are not finalized.
+For an unpackaged build that does not require Developer Mode, use:
 
-### Visual MVP and WebView2 isolation test
+```powershell
+.\scripts\run-isolation-spike.ps1
+```
 
-The current window is the native MVP shell. Local diagnostic services remain
-available for the Phase 2 profile-isolation checks. The normal packaged debug
-command requires Windows Developer Mode; the unpackaged self-contained helper
-below does not.
+### Tests
 
-1. Run `powershell -ExecutionPolicy Bypass -File scripts/run-isolation-spike.ps1`.
-   This builds an unpackaged, self-contained diagnostic and does not require
-   Windows Developer Mode.
-2. Wait until the status bar confirms isolation for the current run.
-3. If preferred, enable Windows Developer Mode and use the normal packaged
-   command `dotnet run --project src/Syltr/Syltr.csproj` instead.
-4. In `profile-a`, `profile-b` and `profile-c`, save a different account name.
-5. Switch between the tabs and confirm each name stays in its own profile.
-6. Close and reopen Syltr. The status bar must report that isolation and
-   persistence were both confirmed, and the three names and visit counters must
-   still be present.
-7. Use **Open popup in the same profile** and confirm the native popup displays
-   the saved name from its originating profile.
-8. Select WhatsApp, Gmail, Teams or Outlook and choose **Open in all 3 profiles**
-   to perform real multi-account authentication tests.
-9. Use **Delete profile** only with diagnostic/test accounts, then confirm the
-   remaining tabs retain their data and sessions.
-10. Return to **Diagnostic local** and test camera, microphone, location,
-    notifications and clipboard. Confirm the native dialog identifies the
-    origin and profile. Clear **Remember for this profile** when you want the
-    same prompt to appear again.
-11. Choose **Download test file** twice. Confirm the status bar reports
-    completion and the Downloads folder contains the original name plus a
-    collision-safe `(1)` copy.
-12. Use **Normal notification** and **Service worker notification**. Confirm a
-    Windows notification appears and **Open service** selects its originating
-    profile; clicking the Windows notification should do the same.
-13. Select a file in the upload test and paste an image into the clipboard test
-    area. The page should show file metadata and an image preview without
-    uploading either item anywhere.
-14. Use **Add** to choose a catalog service or enter a custom URL. Edit it from
-    the overflow menu, mute or disable it, drag its tab to reorder it, restart
-    Syltr and confirm its order and isolated session persist. Re-enable a
-    disabled service and confirm the prior session returns.
-15. Add enough diagnostic/custom instances to reach 5, 10 and 20 loaded
-    services. At each point record the WebView2 working set, private memory and
-    process count with an external Windows process profiler.
-16. Add a second instance of the same catalog service. Confirm the rail keeps a
-    single grouped tile and shows the account/instance selector above the web
-    content; its badge should aggregate unread counts from the group.
-17. Click a link that requests a new tab (`target=_blank`) and confirm it opens
-    directly in the default browser. Then exercise OAuth/SSO and confirm its
-    popup and redirects remain in Syltr without a destination prompt.
-18. Validate `Ctrl+N`, `Ctrl+E`, `Ctrl+R`, `Ctrl+Tab`,
-    `Ctrl+Shift+Tab`, `Alt+Left`, `Alt+Right` and `Ctrl+Shift+M`.
+```powershell
+dotnet test Syltr.slnx -c Debug
+```
 
-The diagnostic page is local and uses the same `https://syltr.test` origin in
-every WebView. Only the WebView2 profile changes, so distinct values demonstrate
-storage isolation without requiring real service credentials. This diagnostic
-will be replaced by the native service rail after the isolation gate is proven.
+Tests live in `tests/Syltr.Tests` and follow the same module organization as
+the application. New domain behavior and bug fixes should include unit tests.
 
-## Engineering conventions
+### Diagnostics
 
-- Nullable reference types remain enabled.
-- New domain behavior requires unit tests.
-- Ported code belongs in the Windows module that corresponds to its Linux reference module.
-- WebView2 types must not leak outside `Syltr.Engine` unless an explicit architecture decision documents why.
-- Persistence and application data paths belong in `Syltr.Config`, not code-behind.
-- Code-behind should coordinate view concerns; product rules belong in testable classes.
-- Avoid service-specific hacks in generic hosting code. Put them in named recipes with rationale.
-- Keep compatibility scripts as separate embedded resources instead of large C# string literals.
-- Record meaningful architecture decisions in the repository when a spike resolves an open question.
+Set `SYLTR_DEBUG=1` before starting the application to record WebView2 console
+messages in the local diagnostic log:
 
-## Current open decisions
+```powershell
+$env:SYLTR_DEBUG = "1"
+dotnet run --project src/Syltr/Syltr.csproj
+```
 
-The following items are deliberately unresolved until evidence is collected:
+Build and distribution instructions are documented in
+[`docs/distribution.md`](docs/distribution.md). Contribution conventions are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-- exact `ServiceViewHost` public API;
-- whether native WebView2 notifications fully cover persistent service-worker notifications;
-- real-service validation of the automatic link versus OAuth/SSO classification;
-- whether all enabled services remain loaded indefinitely;
-- configuration storage path for packaged versus unpackaged development;
-- code-signing identity and final package publisher;
-- minimum supported Windows release for the first public build;
-- whether ARM64 ships with the first stable release;
-- final application ID and package publisher.
+## Structure
 
-## Estimated roadmap
+| Path | Responsibility |
+| --- | --- |
+| `src/Syltr/App.xaml(.cs)` | Application startup, lifecycle and shared resources |
+| `src/Syltr/Window/` | Native window, service rail, actions and dialogs |
+| `src/Syltr/Engine/` | WebView2 sessions, navigation, downloads, notifications and browser integration |
+| `src/Syltr/Config/` | Service models, settings, persistence and application data paths |
+| `src/Syltr/Catalog/` | Catalog of known services |
+| `src/Syltr/Icon/` | Service tiles, favicons and unread badges |
+| `src/Syltr/Spellcheck/` | Windows spell-check integration |
+| `src/Syltr/Localization/` and `src/Syltr/Strings/` | Localization infrastructure and translated resources |
+| `tests/Syltr.Tests/` | Unit and architecture tests |
+| `scripts/` | Local build, packaging and asset-generation helpers |
+| `docs/` | Architecture decisions and development documentation |
 
-For one experienced developer working full-time, the initial estimate is:
+The application accesses WebView2 only through the public API exposed by
+`Syltr.Engine`; UI code should not manipulate browser-specific types directly.
+Platform-independent rules belong in `Catalog` or `Config`, while native
+presentation and interaction belong in `Window`.
 
-- foundation and technical spike: 1–2 weeks;
-- domain, persistence and MVP UI: 2–3 weeks;
-- feature parity and service compatibility: 2–4 weeks;
-- packaging, hardening and beta feedback: 1–2 weeks.
+## License
 
-Total: approximately **6–10 weeks** for a credible first public version. Website-specific issues and signing/store requirements can change this estimate.
-
-## Licensing
-
-The original Syltr project is licensed under GPL-3.0-or-later. Reusing its code or GPL-covered assets means this implementation should remain GPL-3.0-or-later unless ownership and licensing of every reused component allow a different decision.
-
-Service names and logos may be trademarks of their respective owners. Before distribution, every bundled asset must have its source and license reviewed, and the application must clearly state that it is not affiliated with the hosted services.
-
-## Immediate next steps
-
-1. Complete the runtime keyboard, Narrator, high-contrast and scaling pass in
-   [`docs/accessibility-test-plan.md`](docs/accessibility-test-plan.md).
-2. Validate a service-specific user-agent rule or compatibility script only
-   when a real service demonstrates a Chromium/WebView2 failure.
-3. Apply for trusted open-source code signing, replace the provisional package
-   publisher with the assigned certificate subject and enable signed GitHub
-   Releases.
+GPL-3.0-or-later
