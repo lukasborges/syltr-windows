@@ -27,7 +27,13 @@
   <data name="Common_Save" xml:space="preserve"><value>Save</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Address</value></data>
-  <data name="About_Content" xml:space="preserve"><value>Version {0}&#xA;&#xA;Your web services in one window, with isolated sessions.</value></data>
+  <data name="About_Title" xml:space="preserve"><value>About Syltr</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="About_Developer" xml:space="preserve"><value>by Lucas Borges</value></data>
+  <data name="About_Description" xml:space="preserve"><value>All-in-one messaging aggregator for GNOME.</value></data>
+  <data name="About_Website" xml:space="preserve"><value>Website</value></data>
+  <data name="About_ReportIssue" xml:space="preserve"><value>Report an issue</value></data>
+  <data name="About_License" xml:space="preserve"><value>GNU General Public License, version 3 or later</value></data>
   <data name="Spellcheck_Title" xml:space="preserve"><value>Spell checking</value></data>
   <data name="Spellcheck_NoPreferredLanguages" xml:space="preserve"><value>Windows did not report any preferred languages.</value></data>
   <data name="Spellcheck_Description" xml:space="preserve"><value>WebView2 uses the preferred languages and dictionaries installed in Windows.&#xA;&#xA;{0}&#xA;&#xA;Change languages in Windows Settings and restart Syltr to refresh the web profiles.</value></data>

@@ -27,7 +27,13 @@
   <data name="Common_Save" xml:space="preserve"><value>Salvar</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Endereço</value></data>
-  <data name="About_Content" xml:space="preserve"><value>Versão {0}&#xA;&#xA;Seus serviços web em uma única janela, com sessões isoladas.</value></data>
+  <data name="About_Title" xml:space="preserve"><value>Sobre o Syltr</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Versão {0}</value></data>
+  <data name="About_Developer" xml:space="preserve"><value>por Lucas Borges</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Agregador de serviços de mensagens para o GNOME.</value></data>
+  <data name="About_Website" xml:space="preserve"><value>Site</value></data>
+  <data name="About_ReportIssue" xml:space="preserve"><value>Relatar um problema</value></data>
+  <data name="About_License" xml:space="preserve"><value>GNU General Public License, versão 3 ou posterior</value></data>
   <data name="Spellcheck_Title" xml:space="preserve"><value>Correção ortográfica</value></data>
   <data name="Spellcheck_NoPreferredLanguages" xml:space="preserve"><value>Nenhum idioma preferido foi informado pelo Windows.</value></data>
   <data name="Spellcheck_Description" xml:space="preserve"><value>O WebView2 usa os idiomas preferidos e os dicionários instalados no Windows.&#xA;&#xA;{0}&#xA;&#xA;Altere os idiomas nas Configurações do Windows e reinicie o Syltr para atualizar os perfis web.</value></data>

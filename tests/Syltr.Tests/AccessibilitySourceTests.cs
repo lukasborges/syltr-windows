@@ -46,6 +46,20 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("Focus(Microsoft.UI.Xaml.FocusState.Programmatic)", code);
     }
 
+    [Fact]
+    public void About_dialog_exposes_the_linux_reference_metadata()
+    {
+        var root = FindRepositoryRoot();
+        var code = File.ReadAllText(Path.Combine(root, "src", "Syltr", "Window", "MainPage.xaml.cs"));
+
+        Assert.Contains("ms-appx:///Assets/Syltr.svg", code);
+        Assert.Contains("About_Developer", code);
+        Assert.Contains("About_Description", code);
+        Assert.Contains("https://github.com/lukasborges/syltr", code);
+        Assert.Contains("https://github.com/lukasborges/syltr/issues", code);
+        Assert.Contains("About_License", code);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

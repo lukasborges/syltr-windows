@@ -546,12 +546,78 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        var version = typeof(MainPage).Assembly.GetName().Version?.ToString(3) ?? "desenvolvimento";
+        var version = typeof(MainPage).Assembly.GetName().Version?.ToString(3) ?? "0.1.0";
+        var content = new StackPanel
+        {
+            MaxWidth = 420,
+            Spacing = 10,
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch
+        };
+        content.Children.Add(new Image
+        {
+            Width = 96,
+            Height = 96,
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center,
+            Source = new SvgImageSource(new Uri("ms-appx:///Assets/Syltr.svg"))
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = "Syltr",
+            FontSize = 24,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = AppText.Format("About_Version", version),
+            Opacity = 0.7,
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = AppText.Get("About_Developer"),
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = AppText.Get("About_Description"),
+            Margin = new Microsoft.UI.Xaml.Thickness(0, 4, 0, 2),
+            TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center,
+            TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+        });
+
+        var links = new StackPanel
+        {
+            Orientation = Microsoft.UI.Xaml.Controls.Orientation.Horizontal,
+            HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center,
+            Spacing = 4
+        };
+        links.Children.Add(new HyperlinkButton
+        {
+            Content = AppText.Get("About_Website"),
+            NavigateUri = new Uri("https://github.com/lukasborges/syltr")
+        });
+        links.Children.Add(new HyperlinkButton
+        {
+            Content = AppText.Get("About_ReportIssue"),
+            NavigateUri = new Uri("https://github.com/lukasborges/syltr/issues")
+        });
+        content.Children.Add(links);
+        content.Children.Add(new TextBlock
+        {
+            Text = AppText.Get("About_License"),
+            Margin = new Microsoft.UI.Xaml.Thickness(0, 6, 0, 0),
+            FontSize = 12,
+            Opacity = 0.7,
+            TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center,
+            TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+        });
+
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Syltr",
-            Content = AppText.Format("About_Content", version),
+            Title = AppText.Get("About_Title"),
+            Content = content,
             CloseButtonText = AppText.Get("Common_Close"),
             DefaultButton = ContentDialogButton.Close
         };
