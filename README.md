@@ -208,7 +208,7 @@ Multiple profiles under one user data folder should isolate cookies, storage, ca
 | Web notification shim | Prefer native WebView2 APIs; keep a tested service-worker fallback if needed |
 | WebKit media workarounds | Do not port unless Chromium testing demonstrates a need |
 | MPRIS/PipeWire workarounds | Remove; Linux-specific |
-| Hunspell system discovery | Do not port initially; evaluate WebView2/Chromium spell checking |
+| Hunspell system discovery | Replace with WebView2's Windows-managed dictionaries and a shortcut to system language settings |
 | SVG service assets and translations | Reuse after license and rendering review |
 
 Linux/WebKit workarounds must never be copied blindly. Every compatibility script should have a documented failing service, a test procedure and a removal condition.
@@ -302,10 +302,10 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Downloads to the Windows Downloads folder.
 - [x] Collision-free download filenames and completion notification.
 - [x] Custom user-agent per service.
-- [ ] Spell-check behavior and language strategy.
+- [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
 - [ ] Debug console capture and diagnostics.
 - [ ] Configuration import from the Linux application.
-- [ ] Portuguese and English resources.
+- [ ] Portuguese and English resources (foundation and primary workflows implemented).
 - [ ] Accessibility review and full keyboard navigation.
 
 ### Phase 5 — Hardening and distribution
@@ -513,7 +513,6 @@ The following items are deliberately unresolved until evidence is collected:
 - whether native WebView2 notifications fully cover persistent service-worker notifications;
 - real-service validation of the automatic link versus OAuth/SSO classification;
 - whether all enabled services remain loaded indefinitely;
-- spell-check language controls;
 - configuration storage path for packaged versus unpackaged development;
 - installer/update channel and code-signing identity;
 - minimum supported Windows release for the first public build;
@@ -544,4 +543,4 @@ Service names and logos may be trademarks of their respective owners. Before dis
 3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
 4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
 5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
-6. Port the supported `Spellcheck` behavior and localized resources module by module.
+6. Port localized resources module by module.

@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Syltr.Catalog;
+using Syltr.Localization;
 using Windows.Graphics;
 
 namespace Syltr.Window;
@@ -23,7 +24,7 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
     {
         ArgumentNullException.ThrowIfNull(owner);
 
-        Title = "Adicionar serviço";
+        Title = AppText.Get("AddService_Title");
         AppWindow.SetIcon("Assets/AppIcon.ico");
         AppWindow.SetPresenter(OverlappedPresenter.CreateForDialog());
         AppWindow.Resize(new SizeInt32(500, 650));
@@ -55,7 +56,7 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
     {
         var searchBox = new AutoSuggestBox
         {
-            PlaceholderText = "Buscar serviços",
+            PlaceholderText = AppText.Get("AddService_SearchPlaceholder"),
             QueryIcon = new SymbolIcon(Symbol.Find),
             HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch
         };
@@ -70,8 +71,8 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
             HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Right,
             VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Center
         };
-        AutomationProperties.SetName(customButton, "Adicionar serviço personalizado");
-        ToolTipService.SetToolTip(customButton, "Adicionar serviço personalizado");
+        AutomationProperties.SetName(customButton, AppText.Get("AddService_Custom"));
+        ToolTipService.SetToolTip(customButton, AppText.Get("AddService_Custom"));
         customButton.Click += (_, _) =>
         {
             _result = new AddServiceWindowResult(null, true);
@@ -152,7 +153,7 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
                     Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
                     BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent)
                 };
-                AutomationProperties.SetName(row, $"Adicionar {entry.Name}");
+                AutomationProperties.SetName(row, AppText.Format("AddService_AddEntry", entry.Name));
                 row.Click += (_, _) =>
                 {
                     _result = new AddServiceWindowResult(entry, false);
@@ -229,11 +230,11 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
 
     private static string CategoryDisplayName(ServiceCatalogCategory category) => category switch
     {
-        ServiceCatalogCategory.Messaging => "Mensagens",
-        ServiceCatalogCategory.Email => "E-mail",
-        ServiceCatalogCategory.Calendar => "Calendário",
-        ServiceCatalogCategory.Tasks => "Tarefas",
-        ServiceCatalogCategory.AI => "Inteligência artificial",
+        ServiceCatalogCategory.Messaging => AppText.Get("Category_Messaging"),
+        ServiceCatalogCategory.Email => AppText.Get("Category_Email"),
+        ServiceCatalogCategory.Calendar => AppText.Get("Category_Calendar"),
+        ServiceCatalogCategory.Tasks => AppText.Get("Category_Tasks"),
+        ServiceCatalogCategory.AI => AppText.Get("Category_AI"),
         _ => category.ToString()
     };
 

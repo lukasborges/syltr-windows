@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Syltr.Catalog;
 using Syltr.Config;
@@ -9,6 +10,8 @@ using Syltr.Config.Notifications;
 using Syltr.Engine;
 using Syltr.Engine.Spike;
 using Syltr.Icon;
+using Syltr.Localization;
+using Syltr.Spellcheck;
 
 namespace Syltr.Window;
 
@@ -44,9 +47,30 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         InitializeComponent();
+        ApplyLocalizedShellText();
         ServiceRail.ItemsSource = _railGroups;
         StatusInfoBar.RegisterPropertyChangedCallback(InfoBar.TitleProperty, OnStatusChanged);
         StatusInfoBar.RegisterPropertyChangedCallback(InfoBar.SeverityProperty, OnStatusChanged);
+    }
+
+    private void ApplyLocalizedShellText()
+    {
+        LocalizeHeaderButton(MainMenuButton, "Header_MainMenu", "Header_MainMenu_Tooltip");
+        LocalizeHeaderButton(AddServiceButton, "Header_AddService", "Header_AddService_Tooltip");
+        LocalizeHeaderButton(BackButton, "Header_Back", "Header_Back_Tooltip");
+        LocalizeHeaderButton(ForwardButton, "Header_Forward", "Header_Forward_Tooltip");
+        LocalizeHeaderButton(ReloadButton, "Header_Reload", "Header_Reload_Tooltip");
+        LocalizeHeaderButton(HomeButton, "Header_Home", "Header_Home_Tooltip");
+        LocalizeHeaderButton(DoNotDisturbButton, "Header_DoNotDisturb", "Header_DoNotDisturb_Tooltip");
+    }
+
+    private static void LocalizeHeaderButton(
+        Microsoft.UI.Xaml.DependencyObject button,
+        string automationResource,
+        string tooltipResource)
+    {
+        AutomationProperties.SetName(button, AppText.Get(automationResource));
+        ToolTipService.SetToolTip(button, AppText.Get(tooltipResource));
     }
 
     private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -76,18 +100,6 @@ public sealed partial class MainPage : Page
             _loadingSettings = true;
             var loadedSettings = await _settingsStore.LoadAsync();
             _settings = loadedSettings.Value;
-            if (loadedSettings.Status == ConfigurationLoadStatus.Created &&
-                _settings.SpellLanguages.Count == 0)
-            {
-                _settings = _settings with
-                {
-                    SpellLanguages = Windows.System.UserProfile.GlobalizationPreferences.Languages
-                        .Select(language => language.Replace('-', '_'))
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .ToArray()
-                };
-                await _settingsStore.SaveAsync(_settings);
-            }
             DoNotDisturbButton.IsChecked = _settings.DoNotDisturb;
             DoNotDisturbIcon.Glyph = _settings.DoNotDisturb ? "\uEB71" : "\uEA8F";
             _loadingSettings = false;
@@ -273,7 +285,7 @@ public sealed partial class MainPage : Page
         }
 
         flyout.Items.Add(new MenuFlyoutSeparator());
-        var addInstance = new MenuFlyoutItem { Text = "Adicionar outra instância…" };
+        var addInstance = new MenuFlyoutItem { Text = AppText.Get("Context_AddInstance") };
         addInstance.Click += async (_, _) =>
         {
             var service = _services.FirstOrDefault(configured =>
@@ -317,7 +329,7 @@ public sealed partial class MainPage : Page
         {
             Placement = Microsoft.UI.Xaml.Controls.Primitives.FlyoutPlacementMode.RightEdgeAlignedTop
         };
-        var reload = new MenuFlyoutItem { Text = "Recarregar" };
+        var reload = new MenuFlyoutItem { Text = AppText.Get("Context_Reload") };
         reload.Click += async (_, _) =>
         {
             if (SelectedReadyHost() is { } readyHost)
@@ -329,21 +341,21 @@ public sealed partial class MainPage : Page
                 await RecoverSelectedHostAsync();
             }
         };
-        var home = new MenuFlyoutItem { Text = "Ir para o início" };
+        var home = new MenuFlyoutItem { Text = AppText.Get("Context_Home") };
         home.Click += (_, _) => SelectedReadyHost()?.NavigateHome();
-        var edit = new MenuFlyoutItem { Text = "Editar serviço…" };
+        var edit = new MenuFlyoutItem { Text = AppText.Get("Context_Edit") };
         edit.Click += async (_, _) => await ShowEditServiceDialogAsync();
         var mute = new MenuFlyoutItem
         {
-            Text = service.Muted ? "Reativar notificações" : "Silenciar notificações"
+            Text = AppText.Get(service.Muted ? "Context_Unmute" : "Context_Mute")
         };
         mute.Click += async (_, _) => await SetSelectedServiceMutedAsync(!service.Muted);
         var disable = new MenuFlyoutItem
         {
-            Text = service.Disabled ? "Ativar serviço" : "Desativar serviço"
+            Text = AppText.Get(service.Disabled ? "Context_Enable" : "Context_Disable")
         };
         disable.Click += async (_, _) => await SetSelectedServiceDisabledAsync(!service.Disabled);
-        var remove = new MenuFlyoutItem { Text = "Remover serviço" };
+        var remove = new MenuFlyoutItem { Text = AppText.Get("Context_Remove") };
         remove.Click += async (_, _) => await DeleteSelectedProfileAsync();
 
         menu.Items.Add(reload);
@@ -502,8 +514,8 @@ public sealed partial class MainPage : Page
         {
             XamlRoot = XamlRoot,
             Title = "Syltr",
-            Content = $"Versão {version}\n\nSeus serviços web em uma única janela, com sessões isoladas.",
-            CloseButtonText = "Fechar",
+            Content = AppText.Format("About_Content", version),
+            CloseButtonText = AppText.Get("Common_Close"),
             DefaultButton = ContentDialogButton.Close
         };
         await dialog.ShowAsync();
@@ -512,78 +524,37 @@ public sealed partial class MainPage : Page
     private void OnExitClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
         ((App)Microsoft.UI.Xaml.Application.Current).CloseMainWindow();
 
-    private async void OnSpellLanguagesClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void OnSpellcheckClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (_settingsStore is null || XamlRoot is null)
+        if (XamlRoot is null)
         {
             return;
         }
 
-        var languageIds = Windows.System.UserProfile.GlobalizationPreferences.Languages
-            .Select(language => language.Replace('-', '_'))
-            .Concat(_settings.SpellLanguages)
-            .Append("pt_BR")
-            .Append("en_US")
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        var languageList = new StackPanel { Spacing = 4, MinWidth = 360 };
-        var choices = new List<(string Id, CheckBox CheckBox)>();
-        foreach (var languageId in languageIds)
-        {
-            var cultureName = languageId.Replace('_', '-');
-            string displayName;
-            try
-            {
-                displayName = System.Globalization.CultureInfo.GetCultureInfo(cultureName).NativeName;
-            }
-            catch (System.Globalization.CultureNotFoundException)
-            {
-                displayName = languageId;
-            }
-
-            var checkBox = new CheckBox
-            {
-                Content = $"{displayName}  ({languageId})",
-                IsChecked = _settings.SpellLanguages.Contains(languageId, StringComparer.OrdinalIgnoreCase)
-            };
-            choices.Add((languageId, checkBox));
-            languageList.Children.Add(checkBox);
-        }
-
-        var content = new StackPanel { Spacing = 12 };
-        content.Children.Add(new TextBlock
-        {
-            Text = "Idiomas preferidos para a correção ortográfica do conteúdo web.",
-            TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
-        });
-        content.Children.Add(languageList);
+        var languages = WindowsSpellcheckPreferences.GetPreferredLanguages();
+        var languageSummary = languages.Count == 0
+            ? AppText.Get("Spellcheck_NoPreferredLanguages")
+            : string.Join(
+                Environment.NewLine,
+                languages.Select(language => $"• {language.DisplayName} ({language.Id})"));
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Idiomas de correção",
-            Content = content,
-            PrimaryButtonText = "Salvar",
-            CloseButtonText = "Cancelar",
-            DefaultButton = ContentDialogButton.Primary
+            Title = AppText.Get("Spellcheck_Title"),
+            Content = new TextBlock
+            {
+                Text = AppText.Format("Spellcheck_Description", languageSummary),
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+                MaxWidth = 460
+            },
+            PrimaryButtonText = AppText.Get("Spellcheck_OpenSettings"),
+            CloseButtonText = AppText.Get("Common_Close"),
+            DefaultButton = ContentDialogButton.Close
         };
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
         {
-            return;
+            await Windows.System.Launcher.LaunchUriAsync(WindowsSpellcheckPreferences.SettingsUri);
         }
-
-        _settings = _settings with
-        {
-            SpellLanguages = choices
-                .Where(choice => choice.CheckBox.IsChecked == true)
-                .Select(choice => choice.Id)
-                .ToArray()
-        };
-        await _settingsStore.SaveAsync(_settings);
-        StatusInfoBar.Title = "Idiomas de correção atualizados";
-        StatusInfoBar.Message = _settings.SpellLanguages.Count == 0
-            ? "O WebView2 usará as preferências padrão do sistema."
-            : string.Join(", ", _settings.SpellLanguages);
-        StatusInfoBar.Severity = InfoBarSeverity.Success;
     }
 
     private async Task ShowAddServiceDialogAsync()
@@ -628,12 +599,16 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        var nameBox = new TextBox { Header = "Nome", PlaceholderText = "Ex.: Teams trabalho" };
-        var urlBox = new TextBox { Header = "Endereço", PlaceholderText = "https://..." };
+        var nameBox = new TextBox
+        {
+            Header = AppText.Get("Field_Name"),
+            PlaceholderText = AppText.Get("CustomService_NamePlaceholder")
+        };
+        var urlBox = new TextBox { Header = AppText.Get("Field_Address"), PlaceholderText = "https://..." };
         var content = new StackPanel { Spacing = 12, MinWidth = 400 };
         content.Children.Add(new TextBlock
         {
-            Text = "Adicione qualquer serviço web por URL.",
+            Text = AppText.Get("CustomService_Description"),
             TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
         });
         content.Children.Add(nameBox);
@@ -641,10 +616,10 @@ public sealed partial class MainPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Serviço personalizado",
+            Title = AppText.Get("CustomService_Title"),
             Content = content,
-            PrimaryButtonText = "Adicionar",
-            CloseButtonText = "Cancelar",
+            PrimaryButtonText = AppText.Get("Common_Add"),
+            CloseButtonText = AppText.Get("Common_Cancel"),
             DefaultButton = ContentDialogButton.Primary
         };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)
@@ -658,8 +633,8 @@ public sealed partial class MainPage : Page
         if (_serviceStore is null || XamlRoot is null ||
             !ServiceUrl.TryNormalize(requestedUrl, out var normalizedUrl))
         {
-            StatusInfoBar.Title = "Serviço inválido";
-            StatusInfoBar.Message = "Informe um nome e um endereço HTTP ou HTTPS válido.";
+            StatusInfoBar.Title = AppText.Get("Service_InvalidTitle");
+            StatusInfoBar.Message = AppText.Get("Service_InvalidNameAddress");
             StatusInfoBar.Severity = InfoBarSeverity.Error;
             return;
         }
@@ -667,14 +642,14 @@ public sealed partial class MainPage : Page
         var name = requestedName.Trim();
         if (promptForDuplicateName && _services.Any(service => service.Url == normalizedUrl))
         {
-            var nameBox = new TextBox { Header = "Nome", Text = name };
+            var nameBox = new TextBox { Header = AppText.Get("Field_Name"), Text = name };
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Nomear esta instância",
+                Title = AppText.Get("Instance_NameTitle"),
                 Content = nameBox,
-                PrimaryButtonText = "Adicionar",
-                CloseButtonText = "Cancelar",
+                PrimaryButtonText = AppText.Get("Common_Add"),
+                CloseButtonText = AppText.Get("Common_Cancel"),
                 DefaultButton = ContentDialogButton.Primary
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -687,8 +662,8 @@ public sealed partial class MainPage : Page
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            StatusInfoBar.Title = "Serviço inválido";
-            StatusInfoBar.Message = "Informe um nome para o serviço.";
+            StatusInfoBar.Title = AppText.Get("Service_InvalidTitle");
+            StatusInfoBar.Message = AppText.Get("Service_InvalidName");
             StatusInfoBar.Severity = InfoBarSeverity.Error;
             return;
         }
@@ -705,14 +680,14 @@ public sealed partial class MainPage : Page
         SelectRailItem(railItem);
         if (await TryInitializeHostAsync(host))
         {
-            StatusInfoBar.Title = $"{service.Name} adicionado";
-            StatusInfoBar.Message = $"Perfil isolado {host.ProfileName} criado e salvo.";
+            StatusInfoBar.Title = AppText.Format("Service_AddedTitle", service.Name);
+            StatusInfoBar.Message = AppText.Format("Service_AddedMessage", host.ProfileName);
             StatusInfoBar.Severity = InfoBarSeverity.Success;
         }
         else
         {
-            StatusInfoBar.Title = $"{service.Name} foi salvo, mas não carregou";
-            StatusInfoBar.Message = host.State.ErrorMessage ?? "Use o menu contextual para tentar novamente.";
+            StatusInfoBar.Title = AppText.Format("Service_SavedNotLoadedTitle", service.Name);
+            StatusInfoBar.Message = host.State.ErrorMessage ?? AppText.Get("Service_TryContextMenu");
             StatusInfoBar.Severity = InfoBarSeverity.Warning;
         }
     }
@@ -737,13 +712,13 @@ public sealed partial class MainPage : Page
         }
 
         var service = _services[serviceIndex];
-        var nameBox = new TextBox { Header = "Nome", Text = service.Name };
-        var urlBox = new TextBox { Header = "Endereço", Text = service.Url };
+        var nameBox = new TextBox { Header = AppText.Get("Field_Name"), Text = service.Name };
+        var urlBox = new TextBox { Header = AppText.Get("Field_Address"), Text = service.Url };
         var userAgentBox = new TextBox
         {
-            Header = "User-Agent personalizado (opcional)",
+            Header = AppText.Get("EditService_UserAgent"),
             Text = service.UserAgent ?? string.Empty,
-            PlaceholderText = "Deixe vazio para usar o padrão do WebView2"
+            PlaceholderText = AppText.Get("EditService_UserAgentPlaceholder")
         };
         var content = new StackPanel { Spacing = 12, MinWidth = 420 };
         content.Children.Add(nameBox);
@@ -752,10 +727,10 @@ public sealed partial class MainPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = $"Editar {service.Name}",
+            Title = AppText.Format("EditService_Title", service.Name),
             Content = content,
-            PrimaryButtonText = "Salvar",
-            CloseButtonText = "Cancelar",
+            PrimaryButtonText = AppText.Get("Common_Save"),
+            CloseButtonText = AppText.Get("Common_Cancel"),
             DefaultButton = ContentDialogButton.Primary
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -766,8 +741,8 @@ public sealed partial class MainPage : Page
         var name = nameBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name) || !ServiceUrl.TryNormalize(urlBox.Text, out var normalizedUrl))
         {
-            StatusInfoBar.Title = "Serviço inválido";
-            StatusInfoBar.Message = "Informe um nome e um endereço HTTP ou HTTPS válido.";
+            StatusInfoBar.Title = AppText.Get("Service_InvalidTitle");
+            StatusInfoBar.Message = AppText.Get("Service_InvalidNameAddress");
             StatusInfoBar.Severity = InfoBarSeverity.Error;
             return;
         }
@@ -1044,10 +1019,10 @@ public sealed partial class MainPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = $"Remover {railItem.Tile.Name}?",
-            Content = "Cookies, sessão e armazenamento deste serviço serão removidos. Os demais serviços não serão alterados.",
-            PrimaryButtonText = "Remover serviço",
-            CloseButtonText = "Cancelar",
+            Title = AppText.Format("RemoveService_Title", railItem.Tile.Name),
+            Content = AppText.Get("RemoveService_Description"),
+            PrimaryButtonText = AppText.Get("Context_Remove"),
+            CloseButtonText = AppText.Get("Common_Cancel"),
             DefaultButton = ContentDialogButton.Close
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -1106,8 +1081,8 @@ public sealed partial class MainPage : Page
         SelectRailContent();
         UpdateServiceOverlay();
 
-        StatusInfoBar.Title = "Serviço removido";
-        StatusInfoBar.Message = $"{railItem.Tile.Name} e sua sessão foram removidos.";
+        StatusInfoBar.Title = AppText.Get("RemoveService_CompletedTitle");
+        StatusInfoBar.Message = AppText.Format("RemoveService_CompletedMessage", railItem.Tile.Name);
         StatusInfoBar.Severity = InfoBarSeverity.Warning;
         UpdateSelectedProfileStatus();
     }
@@ -1472,18 +1447,21 @@ public sealed partial class MainPage : Page
 
             var rememberChoice = new CheckBox
             {
-                Content = "Lembrar para este perfil",
+                Content = AppText.Get("Permission_Remember"),
                 IsChecked = true
             };
             var content = new StackPanel { Spacing = 12 };
             content.Children.Add(new TextBlock
             {
-                Text = $"{request.Origin.Host} quer acessar {PermissionName(request.Kind)}.",
+                Text = AppText.Format(
+                    "Permission_RequestDescription",
+                    request.Origin.Host,
+                    PermissionName(request.Kind)),
                 TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
             });
             content.Children.Add(new TextBlock
             {
-                Text = $"Perfil: {request.ProfileName}\nOrigem: {request.Origin}",
+                Text = AppText.Format("Permission_Details", request.ProfileName, request.Origin),
                 TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
             });
             content.Children.Add(rememberChoice);
@@ -1491,10 +1469,10 @@ public sealed partial class MainPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = $"Permitir {PermissionName(request.Kind)}?",
+                Title = AppText.Format("Permission_Title", PermissionName(request.Kind)),
                 Content = content,
-                PrimaryButtonText = "Permitir",
-                CloseButtonText = "Negar",
+                PrimaryButtonText = AppText.Get("Permission_Allow"),
+                CloseButtonText = AppText.Get("Permission_Deny"),
                 DefaultButton = ContentDialogButton.Close
             };
             var result = await dialog.ShowAsync();
@@ -1520,19 +1498,19 @@ public sealed partial class MainPage : Page
 
     private static string PermissionName(ServicePermissionKind kind) => kind switch
     {
-        ServicePermissionKind.Microphone => "o microfone",
-        ServicePermissionKind.Camera => "a câmera",
-        ServicePermissionKind.Geolocation => "sua localização",
-        ServicePermissionKind.Notifications => "as notificações",
-        ServicePermissionKind.OtherSensors => "os sensores do dispositivo",
-        ServicePermissionKind.ClipboardRead => "a área de transferência",
-        ServicePermissionKind.MultipleAutomaticDownloads => "downloads automáticos",
-        ServicePermissionKind.FileReadWrite => "arquivos e pastas selecionados",
-        ServicePermissionKind.Autoplay => "a reprodução automática",
-        ServicePermissionKind.LocalFonts => "as fontes locais",
-        ServicePermissionKind.MidiSystemExclusiveMessages => "dispositivos MIDI",
-        ServicePermissionKind.WindowManagement => "o gerenciamento de janelas",
-        _ => "um recurso do dispositivo"
+        ServicePermissionKind.Microphone => AppText.Get("Permission_Microphone"),
+        ServicePermissionKind.Camera => AppText.Get("Permission_Camera"),
+        ServicePermissionKind.Geolocation => AppText.Get("Permission_Geolocation"),
+        ServicePermissionKind.Notifications => AppText.Get("Permission_Notifications"),
+        ServicePermissionKind.OtherSensors => AppText.Get("Permission_OtherSensors"),
+        ServicePermissionKind.ClipboardRead => AppText.Get("Permission_Clipboard"),
+        ServicePermissionKind.MultipleAutomaticDownloads => AppText.Get("Permission_AutomaticDownloads"),
+        ServicePermissionKind.FileReadWrite => AppText.Get("Permission_Files"),
+        ServicePermissionKind.Autoplay => AppText.Get("Permission_Autoplay"),
+        ServicePermissionKind.LocalFonts => AppText.Get("Permission_LocalFonts"),
+        ServicePermissionKind.MidiSystemExclusiveMessages => AppText.Get("Permission_Midi"),
+        ServicePermissionKind.WindowManagement => AppText.Get("Permission_WindowManagement"),
+        _ => AppText.Get("Permission_DeviceResource")
     };
 
     private ServiceViewHost? SelectedHost() =>
@@ -1606,9 +1584,9 @@ public sealed partial class MainPage : Page
             ServiceStateOverlay.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             ServiceStateProgressRing.IsActive = false;
             ServiceStateProgressRing.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
-            ServiceStateTitle.Text = "Nenhum serviço configurado";
-            ServiceStateMessage.Text = "Adicione um serviço do catálogo ou informe uma URL personalizada.";
-            ServiceStateActionButton.Content = "Adicionar serviço";
+            ServiceStateTitle.Text = AppText.Get("State_NoServicesTitle");
+            ServiceStateMessage.Text = AppText.Get("State_NoServicesMessage");
+            ServiceStateActionButton.Content = AppText.Get("Header_AddService");
             ServiceStateActionButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             return;
         }
@@ -1630,9 +1608,9 @@ public sealed partial class MainPage : Page
             ServiceStateProgressRing.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             ServiceStateProgressRing.IsActive = true;
             ServiceStateTitle.Text = state.Status == ServiceViewStatus.Recovering
-                ? "Recuperando serviço"
-                : "Carregando serviço";
-            ServiceStateMessage.Text = $"Perfil {host.ProfileName}";
+                ? AppText.Get("State_Recovering")
+                : AppText.Get("State_Loading");
+            ServiceStateMessage.Text = AppText.Format("State_Profile", host.ProfileName);
             ServiceStateActionButton.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             return;
         }
@@ -1640,10 +1618,10 @@ public sealed partial class MainPage : Page
         ServiceStateProgressRing.IsActive = false;
         ServiceStateProgressRing.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
         ServiceStateTitle.Text = state.Status == ServiceViewStatus.Failed
-            ? "Não foi possível carregar o serviço"
-            : "Serviço indisponível";
-        ServiceStateMessage.Text = state.ErrorMessage ?? $"Perfil {host.ProfileName}";
-        ServiceStateActionButton.Content = "Tentar novamente";
+            ? AppText.Get("State_LoadFailed")
+            : AppText.Get("State_Unavailable");
+        ServiceStateMessage.Text = state.ErrorMessage ?? AppText.Format("State_Profile", host.ProfileName);
+        ServiceStateActionButton.Content = AppText.Get("State_TryAgain");
         ServiceStateActionButton.Visibility = state.Status == ServiceViewStatus.Failed
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
@@ -1804,14 +1782,14 @@ public sealed partial class MainPage : Page
         });
         content.Children.Add(new TextBlock
         {
-            Text = $"{service.Name} está desativado",
+            Text = AppText.Format("State_DisabledTitle", service.Name),
             FontSize = 22,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center
         });
         content.Children.Add(new TextBlock
         {
-            Text = "Use o menu de clique direito para reativar sem perder a sessão.",
+            Text = AppText.Get("State_DisabledMessage"),
             TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
             HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Center
         });

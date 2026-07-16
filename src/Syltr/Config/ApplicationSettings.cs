@@ -11,5 +11,6 @@ public sealed record ApplicationSettings
     public bool DoNotDisturb { get; init; }
 
     [JsonPropertyName("spell_languages")]
+    // Retained for Linux configuration compatibility. WebView2 uses Windows-managed dictionaries.
     public IReadOnlyList<string> SpellLanguages { get; init; } = [];
 }

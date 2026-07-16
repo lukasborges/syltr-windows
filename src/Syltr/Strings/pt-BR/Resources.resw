@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="SpellcheckMenuItem.Text" xml:space="preserve"><value>Correção ortográfica…</value></data>
+  <data name="DiagnosticsMenuItem.Text" xml:space="preserve"><value>Diagnóstico</value></data>
+  <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recuperar serviço</value></data>
+  <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Medir memória</value></data>
+  <data name="TestNotificationMenuItem.Text" xml:space="preserve"><value>Testar notificação do Windows</value></data>
+  <data name="AboutMenuItem.Text" xml:space="preserve"><value>Sobre o Syltr</value></data>
+  <data name="ExitMenuItem.Text" xml:space="preserve"><value>Sair</value></data>
+  <data name="Header_MainMenu" xml:space="preserve"><value>Menu principal</value></data>
+  <data name="Header_MainMenu_Tooltip" xml:space="preserve"><value>Menu principal</value></data>
+  <data name="Header_AddService" xml:space="preserve"><value>Adicionar serviço</value></data>
+  <data name="Header_AddService_Tooltip" xml:space="preserve"><value>Adicionar serviço (Ctrl+N)</value></data>
+  <data name="Header_Back" xml:space="preserve"><value>Voltar</value></data>
+  <data name="Header_Back_Tooltip" xml:space="preserve"><value>Voltar (Alt+Esquerda)</value></data>
+  <data name="Header_Forward" xml:space="preserve"><value>Avançar</value></data>
+  <data name="Header_Forward_Tooltip" xml:space="preserve"><value>Avançar (Alt+Direita)</value></data>
+  <data name="Header_Reload" xml:space="preserve"><value>Recarregar</value></data>
+  <data name="Header_Reload_Tooltip" xml:space="preserve"><value>Recarregar (Ctrl+R)</value></data>
+  <data name="Header_Home" xml:space="preserve"><value>Ir para o início</value></data>
+  <data name="Header_Home_Tooltip" xml:space="preserve"><value>Ir para o início</value></data>
+  <data name="Header_DoNotDisturb" xml:space="preserve"><value>Não perturbe</value></data>
+  <data name="Header_DoNotDisturb_Tooltip" xml:space="preserve"><value>Não perturbe (Ctrl+Shift+M)</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Fechar</value></data>
+  <data name="Common_Add" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common_Save" xml:space="preserve"><value>Salvar</value></data>
+  <data name="Field_Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Field_Address" xml:space="preserve"><value>Endereço</value></data>
+  <data name="About_Content" xml:space="preserve"><value>Versão {0}&#xA;&#xA;Seus serviços web em uma única janela, com sessões isoladas.</value></data>
+  <data name="Spellcheck_Title" xml:space="preserve"><value>Correção ortográfica</value></data>
+  <data name="Spellcheck_NoPreferredLanguages" xml:space="preserve"><value>Nenhum idioma preferido foi informado pelo Windows.</value></data>
+  <data name="Spellcheck_Description" xml:space="preserve"><value>O WebView2 usa os idiomas preferidos e os dicionários instalados no Windows.&#xA;&#xA;{0}&#xA;&#xA;Altere os idiomas nas Configurações do Windows e reinicie o Syltr para atualizar os perfis web.</value></data>
+  <data name="Spellcheck_OpenSettings" xml:space="preserve"><value>Abrir configurações</value></data>
+  <data name="CustomService_Title" xml:space="preserve"><value>Serviço personalizado</value></data>
+  <data name="CustomService_Description" xml:space="preserve"><value>Adicione qualquer serviço web por URL.</value></data>
+  <data name="CustomService_NamePlaceholder" xml:space="preserve"><value>Ex.: Teams trabalho</value></data>
+  <data name="Service_InvalidTitle" xml:space="preserve"><value>Serviço inválido</value></data>
+  <data name="Service_InvalidNameAddress" xml:space="preserve"><value>Informe um nome e um endereço HTTP ou HTTPS válido.</value></data>
+  <data name="Service_InvalidName" xml:space="preserve"><value>Informe um nome para o serviço.</value></data>
+  <data name="Service_AddedTitle" xml:space="preserve"><value>{0} adicionado</value></data>
+  <data name="Service_AddedMessage" xml:space="preserve"><value>Perfil isolado {0} criado e salvo.</value></data>
+  <data name="Service_SavedNotLoadedTitle" xml:space="preserve"><value>{0} foi salvo, mas não carregou</value></data>
+  <data name="Service_TryContextMenu" xml:space="preserve"><value>Use o menu contextual para tentar novamente.</value></data>
+  <data name="Instance_NameTitle" xml:space="preserve"><value>Nomear esta instância</value></data>
+  <data name="EditService_Title" xml:space="preserve"><value>Editar {0}</value></data>
+  <data name="EditService_UserAgent" xml:space="preserve"><value>User-Agent personalizado (opcional)</value></data>
+  <data name="EditService_UserAgentPlaceholder" xml:space="preserve"><value>Deixe vazio para usar o padrão do WebView2</value></data>
+  <data name="RemoveService_Title" xml:space="preserve"><value>Remover {0}?</value></data>
+  <data name="RemoveService_Description" xml:space="preserve"><value>Cookies, sessão e armazenamento deste serviço serão removidos. Os demais serviços não serão alterados.</value></data>
+  <data name="RemoveService_CompletedTitle" xml:space="preserve"><value>Serviço removido</value></data>
+  <data name="RemoveService_CompletedMessage" xml:space="preserve"><value>{0} e sua sessão foram removidos.</value></data>
+  <data name="Context_AddInstance" xml:space="preserve"><value>Adicionar outra instância…</value></data>
+  <data name="Context_Reload" xml:space="preserve"><value>Recarregar</value></data>
+  <data name="Context_Home" xml:space="preserve"><value>Ir para o início</value></data>
+  <data name="Context_Edit" xml:space="preserve"><value>Editar serviço…</value></data>
+  <data name="Context_Mute" xml:space="preserve"><value>Silenciar notificações</value></data>
+  <data name="Context_Unmute" xml:space="preserve"><value>Reativar notificações</value></data>
+  <data name="Context_Disable" xml:space="preserve"><value>Desativar serviço</value></data>
+  <data name="Context_Enable" xml:space="preserve"><value>Ativar serviço</value></data>
+  <data name="Context_Remove" xml:space="preserve"><value>Remover serviço</value></data>
+  <data name="Permission_Remember" xml:space="preserve"><value>Lembrar para este perfil</value></data>
+  <data name="Permission_RequestDescription" xml:space="preserve"><value>{0} quer acessar {1}.</value></data>
+  <data name="Permission_Details" xml:space="preserve"><value>Perfil: {0}&#xA;Origem: {1}</value></data>
+  <data name="Permission_Title" xml:space="preserve"><value>Permitir {0}?</value></data>
+  <data name="Permission_Allow" xml:space="preserve"><value>Permitir</value></data>
+  <data name="Permission_Deny" xml:space="preserve"><value>Negar</value></data>
+  <data name="Permission_Microphone" xml:space="preserve"><value>o microfone</value></data>
+  <data name="Permission_Camera" xml:space="preserve"><value>a câmera</value></data>
+  <data name="Permission_Geolocation" xml:space="preserve"><value>sua localização</value></data>
+  <data name="Permission_Notifications" xml:space="preserve"><value>as notificações</value></data>
+  <data name="Permission_OtherSensors" xml:space="preserve"><value>os sensores do dispositivo</value></data>
+  <data name="Permission_Clipboard" xml:space="preserve"><value>a área de transferência</value></data>
+  <data name="Permission_AutomaticDownloads" xml:space="preserve"><value>downloads automáticos</value></data>
+  <data name="Permission_Files" xml:space="preserve"><value>arquivos e pastas selecionados</value></data>
+  <data name="Permission_Autoplay" xml:space="preserve"><value>a reprodução automática</value></data>
+  <data name="Permission_LocalFonts" xml:space="preserve"><value>as fontes locais</value></data>
+  <data name="Permission_Midi" xml:space="preserve"><value>dispositivos MIDI</value></data>
+  <data name="Permission_WindowManagement" xml:space="preserve"><value>o gerenciamento de janelas</value></data>
+  <data name="Permission_DeviceResource" xml:space="preserve"><value>um recurso do dispositivo</value></data>
+  <data name="State_NoServicesTitle" xml:space="preserve"><value>Nenhum serviço configurado</value></data>
+  <data name="State_NoServicesMessage" xml:space="preserve"><value>Adicione um serviço do catálogo ou informe uma URL personalizada.</value></data>
+  <data name="State_Recovering" xml:space="preserve"><value>Recuperando serviço</value></data>
+  <data name="State_Loading" xml:space="preserve"><value>Carregando serviço</value></data>
+  <data name="State_Profile" xml:space="preserve"><value>Perfil {0}</value></data>
+  <data name="State_LoadFailed" xml:space="preserve"><value>Não foi possível carregar o serviço</value></data>
+  <data name="State_Unavailable" xml:space="preserve"><value>Serviço indisponível</value></data>
+  <data name="State_TryAgain" xml:space="preserve"><value>Tentar novamente</value></data>
+  <data name="State_DisabledTitle" xml:space="preserve"><value>{0} está desativado</value></data>
+  <data name="State_DisabledMessage" xml:space="preserve"><value>Use o menu de clique direito para reativar sem perder a sessão.</value></data>
+  <data name="AddService_Title" xml:space="preserve"><value>Adicionar serviço</value></data>
+  <data name="AddService_SearchPlaceholder" xml:space="preserve"><value>Buscar serviços</value></data>
+  <data name="AddService_Custom" xml:space="preserve"><value>Adicionar serviço personalizado</value></data>
+  <data name="AddService_AddEntry" xml:space="preserve"><value>Adicionar {0}</value></data>
+  <data name="Category_Messaging" xml:space="preserve"><value>Mensagens</value></data>
+  <data name="Category_Social" xml:space="preserve"><value>Redes sociais</value></data>
+  <data name="Category_Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Category_Productivity" xml:space="preserve"><value>Produtividade</value></data>
+  <data name="Category_Calendar" xml:space="preserve"><value>Calendário</value></data>
+  <data name="Category_Tasks" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="Category_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Category_AI" xml:space="preserve"><value>Inteligência artificial</value></data>
+</root>

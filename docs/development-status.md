@@ -9,7 +9,7 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 109 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 114 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -31,6 +31,10 @@ Windows. A auditoria detalhada de paridade continua em
   redirects e popups OAuth/SSO permanecem no Syltr sem diálogo intermediário.
 - Permissões, downloads, favicons, contagem de não lidos, notificações web e
   notificações nativas do Windows.
+- Correção ortográfica gerenciada pelos idiomas e dicionários do Windows, com
+  diagnóstico no menu e atalho para as Configurações de idioma do sistema.
+- Infraestrutura WinUI de localização em `pt-BR` e `en-US`, já aplicada ao menu,
+  header, catálogo, diálogos de serviço, permissões e estados principais.
 - Configuração JSON atômica com esquema/migração, preferências, ordem dos
   serviços, mute, desativação e user-agent opcional.
 - Atalhos equivalentes ao Linux e atalhos adicionais convencionais do Windows.
@@ -52,15 +56,12 @@ Windows. A auditoria detalhada de paridade continua em
 A etapa de fidelidade visual e de fluxo principal está funcional. O próximo
 marco deve começar pelos itens técnicos restantes, nesta ordem:
 
-1. Aplicar de fato ao WebView2 os idiomas de correção ortográfica já salvos nas
-   configurações, depois de validar a estratégia de dicionários do Chromium no
-   Windows.
-2. Mover textos de produto em português e inglês para recursos localizados do
-   WinUI.
-3. Implementar importação compatível do `services.json` do Linux, deixando claro
+1. Concluir a migração dos textos de status, notificações e diagnóstico para os
+   recursos localizados do WinUI.
+2. Implementar importação compatível do `services.json` do Linux, deixando claro
    que as contas precisarão de novo login nos perfis WebView2.
-4. Validar OAuth/SSO e classificação de links externos com serviços reais.
-5. Testar quirks de user-agent e scripts específicos somente nos serviços que
+3. Validar OAuth/SSO e classificação de links externos com serviços reais.
+4. Testar quirks de user-agent e scripts específicos somente nos serviços que
    apresentarem falha real no Chromium/WebView2.
 
 Ao retomar, execute primeiro:

@@ -222,57 +222,52 @@
 
             <StackPanel Margin="6,0,4,0" VerticalAlignment="Center" Orientation="Horizontal">
                 <Button
-                    AutomationProperties.Name="Menu principal"
+                    x:Name="MainMenuButton"
                     Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Menu principal">
+                    >
                     <Button.Content><SymbolIcon Symbol="GlobalNavigationButton" /></Button.Content>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                            <MenuFlyoutItem Click="OnSpellLanguagesClick" Text="Idiomas de correção…" />
-                            <MenuFlyoutSubItem x:Name="DiagnosticsMenuItem" Text="Diagnóstico" Visibility="Collapsed">
-                                <MenuFlyoutItem Click="OnRecoverClick" Text="Recuperar serviço" />
-                                <MenuFlyoutItem Click="OnMeasureMemoryClick" Text="Medir memória" />
-                                <MenuFlyoutItem Click="OnTestWindowsNotificationClick" Text="Testar notificação do Windows" />
+                            <MenuFlyoutItem x:Uid="SpellcheckMenuItem" Click="OnSpellcheckClick" />
+                            <MenuFlyoutSubItem x:Uid="DiagnosticsMenuItem" x:Name="DiagnosticsMenuItem" Visibility="Collapsed">
+                                <MenuFlyoutItem x:Uid="RecoverMenuItem" Click="OnRecoverClick" />
+                                <MenuFlyoutItem x:Uid="MeasureMemoryMenuItem" Click="OnMeasureMemoryClick" />
+                                <MenuFlyoutItem x:Uid="TestNotificationMenuItem" Click="OnTestWindowsNotificationClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
-                            <MenuFlyoutItem Click="OnAboutClick" Text="Sobre o Syltr" />
-                            <MenuFlyoutItem Click="OnExitClick" Text="Sair" />
+                            <MenuFlyoutItem x:Uid="AboutMenuItem" Click="OnAboutClick" />
+                            <MenuFlyoutItem x:Uid="ExitMenuItem" Click="OnExitClick" />
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
                 <Button
-                    AutomationProperties.Name="Adicionar serviço"
+                    x:Name="AddServiceButton"
                     Click="OnAddServiceClick"
-                    Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Adicionar serviço (Ctrl+N)">
+                    Style="{StaticResource HeaderIconButtonStyle}">
                     <SymbolIcon Symbol="Add" />
                 </Button>
                 <Button
-                    AutomationProperties.Name="Voltar"
+                    x:Name="BackButton"
                     Click="OnBackClick"
-                    Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Voltar (Alt+Esquerda)">
+                    Style="{StaticResource HeaderIconButtonStyle}">
                     <SymbolIcon Symbol="Back" />
                 </Button>
                 <Button
-                    AutomationProperties.Name="Avançar"
+                    x:Name="ForwardButton"
                     Click="OnForwardClick"
-                    Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Avançar (Alt+Direita)">
+                    Style="{StaticResource HeaderIconButtonStyle}">
                     <SymbolIcon Symbol="Forward" />
                 </Button>
                 <Button
-                    AutomationProperties.Name="Recarregar"
+                    x:Name="ReloadButton"
                     Click="OnReloadClick"
-                    Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Recarregar (Ctrl+R)">
+                    Style="{StaticResource HeaderIconButtonStyle}">
                     <SymbolIcon Symbol="Refresh" />
                 </Button>
                 <Button
-                    AutomationProperties.Name="Ir para o início"
+                    x:Name="HomeButton"
                     Click="OnHomeClick"
-                    Style="{StaticResource HeaderIconButtonStyle}"
-                    ToolTipService.ToolTip="Ir para o início">
+                    Style="{StaticResource HeaderIconButtonStyle}">
                     <SymbolIcon Symbol="Home" />
                 </Button>
             </StackPanel>
@@ -295,10 +290,8 @@
                 Margin="2,0,8,0"
                 HorizontalAlignment="Right"
                 AutomationProperties.AutomationId="DoNotDisturbButton"
-                AutomationProperties.Name="Não perturbe"
                 Checked="OnDoNotDisturbChanged"
                 Style="{StaticResource HeaderToggleButtonStyle}"
-                ToolTipService.ToolTip="Não perturbe (Ctrl+Shift+M)"
                 Unchecked="OnDoNotDisturbChanged">
                 <FontIcon x:Name="DoNotDisturbIcon" Glyph="&#xEA8F;" />
             </ToggleButton>

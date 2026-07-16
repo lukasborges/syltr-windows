@@ -9,7 +9,7 @@ structure, control placement and service workflows should stay recognizable.
 | Reference behavior | Windows status |
 | --- | --- |
 | One GNOME-style header with icon-only controls | Implemented with a custom WinUI title bar and flat icon buttons |
-| Main menu: spell-check languages, about, quit | Implemented; engineering diagnostics only appear when `SYLTR_DEBUG=1` |
+| Main menu: spell-check, about, quit | Implemented; spell-check reports Windows preferences and opens system language settings |
 | DND at the right edge with active/inactive notification glyphs | Implemented |
 | 84 px icon-only rail | Implemented |
 | 40 px neutral tile, 11 px radius, favicon clamped to 16–24 px | Implemented from `src/icon.rs` constants |
@@ -31,13 +31,14 @@ structure, control placement and service workflows should stay recognizable.
 - Browser sessions use WebView2 profiles. WebKitGTK session data cannot be reused.
 - Permission prompts identify the requesting origin and isolated service profile
   using a native Windows dialog.
+- WebView2 manages spell-check dictionaries from Windows language preferences;
+  its public profile API does not support the Linux per-language toggles.
 
 ## Remaining fidelity work
 
-- Apply the selected spell-check languages to Chromium/WebView2 after validating
-  the supported Windows dictionary strategy. The menu and persistence are present.
-- Move Portuguese and English text into localized WinUI resources; current product
-  strings are primarily Portuguese.
+- Continue moving status, notification and engineering-diagnostic text into the
+  new `pt-BR` and `en-US` WinUI resources. The main menu, header, catalog,
+  service-management dialogs, permission prompt and service states are localized.
 - Validate service-specific user-agent quirks against Chromium. Linux's Safari and
   Chrome-on-Linux spoofing must not be copied without a failing Windows service.
 - Port a website-specific compatibility script only when WebView2 reproduces the
