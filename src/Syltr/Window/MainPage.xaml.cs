@@ -1215,33 +1215,53 @@ public sealed partial class MainPage : Page
             return;
         }
 
-        _activeNotification?.Close();
-        _activeNotification = e;
         var notification = e.Notification;
-        if (_windowsNotifications is { IsRegistered: true })
+        if (TryShowWindowsNotification(notification, e))
         {
-            try
-            {
-                var notificationId = _windowsNotifications.Show(
-                    notification.ProfileName,
-                    string.IsNullOrWhiteSpace(notification.Title)
-                        ? notification.SenderOrigin.Host
-                        : notification.Title,
-                    notification.Body);
-                _webNotifications[notificationId] = e;
-            }
-            catch
-            {
-                // The in-app notification below remains available as a fallback.
-            }
+            return;
         }
 
+        ShowInAppNotification(notification, e);
+    }
+
+    private bool TryShowWindowsNotification(
+        ServiceNotification notification,
+        ServiceNotificationReceivedEventArgs interaction)
+    {
+        if (_windowsNotifications is not { IsRegistered: true })
+        {
+            return false;
+        }
+
+        try
+        {
+            var notificationId = _windowsNotifications.Show(
+                notification.ProfileName,
+                string.IsNullOrWhiteSpace(notification.Title)
+                    ? notification.SenderOrigin.Host
+                    : notification.Title,
+                notification.Body);
+            _webNotifications[notificationId] = interaction;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void ShowInAppNotification(
+        ServiceNotification notification,
+        ServiceNotificationReceivedEventArgs interaction)
+    {
+        _activeNotification?.Close();
+        _activeNotification = interaction;
         var openButton = new Button { Content = AppText.Get("Notification_OpenService") };
         openButton.Click += (_, _) =>
         {
             SelectProfile(notification.ProfileName);
-            e.Click();
-            if (ReferenceEquals(_activeNotification, e))
+            interaction.Click();
+            if (ReferenceEquals(_activeNotification, interaction))
             {
                 _activeNotification = null;
                 StatusInfoBar.ActionButton = null;
