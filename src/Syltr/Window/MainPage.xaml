@@ -234,6 +234,7 @@
                                 <MenuFlyoutItem x:Uid="RecoverMenuItem" Click="OnRecoverClick" />
                                 <MenuFlyoutItem x:Uid="MeasureMemoryMenuItem" Click="OnMeasureMemoryClick" />
                                 <MenuFlyoutItem x:Uid="TestNotificationMenuItem" Click="OnTestWindowsNotificationClick" />
+                                <MenuFlyoutItem x:Uid="OpenLogsMenuItem" Click="OnOpenDiagnosticsFolderClick" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem x:Uid="AboutMenuItem" Click="OnAboutClick" />

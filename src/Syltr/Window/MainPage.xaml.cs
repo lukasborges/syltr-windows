@@ -36,6 +36,7 @@ public sealed partial class MainPage : Page
     private ApplicationSettings _settings = new();
     private WebViewEnvironmentProvider? _environment;
     private ServiceViewContentMapping? _contentMapping;
+    private WebConsoleDiagnosticLog? _webConsoleLog;
     private WindowsAppNotificationService? _windowsNotifications;
     private ServiceNotificationReceivedEventArgs? _activeNotification;
     private string? _pendingActivatedProfile;
@@ -43,6 +44,7 @@ public sealed partial class MainPage : Page
     private bool _isPageLoaded;
     private bool _loadingSettings;
     private bool _changingInstanceSelection;
+    private bool _diagnosticsEnabled;
 
     public MainPage()
     {
@@ -80,7 +82,8 @@ public sealed partial class MainPage : Page
     {
         _isPageLoaded = true;
         ((App)Microsoft.UI.Xaml.Application.Current).SetMainWindowDragRegion(TitleDragRegion);
-        DiagnosticsMenuItem.Visibility = Environment.GetEnvironmentVariable("SYLTR_DEBUG") == "1"
+        _diagnosticsEnabled = Environment.GetEnvironmentVariable("SYLTR_DEBUG") == "1";
+        DiagnosticsMenuItem.Visibility = _diagnosticsEnabled
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
         _windowsNotifications = ((App)Microsoft.UI.Xaml.Application.Current).Notifications;
@@ -92,6 +95,7 @@ public sealed partial class MainPage : Page
 
         _initialized = true;
         var paths = ApplicationDataPaths.ForCurrentUser();
+        _webConsoleLog = _diagnosticsEnabled ? new WebConsoleDiagnosticLog(paths) : null;
         _serviceStore = new ServiceConfigurationStore(paths);
         _settingsStore = new SettingsConfigurationStore(paths);
         _environment = new WebViewEnvironmentProvider(paths);
@@ -227,6 +231,7 @@ public sealed partial class MainPage : Page
             host.NotificationReceived -= OnNotificationReceived;
             host.FaviconChanged -= OnFaviconChanged;
             host.ExternalNavigationRequested -= OnExternalNavigationRequested;
+            host.ConsoleMessageReceived -= OnConsoleMessageReceived;
             host.Dispose();
         }
 
@@ -1075,6 +1080,26 @@ public sealed partial class MainPage : Page
         }
     }
 
+    private async void OnOpenDiagnosticsFolderClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        try
+        {
+            var paths = ApplicationDataPaths.ForCurrentUser();
+            Directory.CreateDirectory(paths.LogsDirectory);
+            var folder = await Windows.Storage.StorageFolder.GetFolderFromPathAsync(paths.LogsDirectory);
+            if (!await Windows.System.Launcher.LaunchFolderAsync(folder))
+            {
+                throw new InvalidOperationException(AppText.Get("Diagnostics_OpenLogsFailedMessage"));
+            }
+        }
+        catch (Exception exception)
+        {
+            StatusInfoBar.Title = AppText.Get("Diagnostics_OpenLogsFailedTitle");
+            StatusInfoBar.Message = exception.Message;
+            StatusInfoBar.Severity = InfoBarSeverity.Error;
+        }
+    }
+
     private void OnTestWindowsNotificationClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (_windowsNotifications is not { IsRegistered: true })
@@ -1162,6 +1187,7 @@ public sealed partial class MainPage : Page
         host.NotificationReceived -= OnNotificationReceived;
         host.FaviconChanged -= OnFaviconChanged;
         host.ExternalNavigationRequested -= OnExternalNavigationRequested;
+        host.ConsoleMessageReceived -= OnConsoleMessageReceived;
         if (host.State.Status == ServiceViewStatus.Disabled && !host.IsInitialized)
         {
             railItem.Content = host.Content;
@@ -1225,6 +1251,7 @@ public sealed partial class MainPage : Page
         e.PopupHost.DownloadStateChanged += OnDownloadStateChanged;
         e.PopupHost.NotificationReceived += OnNotificationReceived;
         e.PopupHost.ExternalNavigationRequested += OnExternalNavigationRequested;
+        e.PopupHost.ConsoleMessageReceived += OnConsoleMessageReceived;
         var popupWindow = new ServicePopupWindow(e.PopupHost, e.RequestedUri);
         popupWindow.Closed += (_, _) =>
         {
@@ -1234,6 +1261,7 @@ public sealed partial class MainPage : Page
             e.PopupHost.DownloadStateChanged -= OnDownloadStateChanged;
             e.PopupHost.NotificationReceived -= OnNotificationReceived;
             e.PopupHost.ExternalNavigationRequested -= OnExternalNavigationRequested;
+            e.PopupHost.ConsoleMessageReceived -= OnConsoleMessageReceived;
             _popupWindows.Remove(popupWindow);
         };
         _popupWindows.Add(popupWindow);
@@ -1259,6 +1287,14 @@ public sealed partial class MainPage : Page
             StatusInfoBar.Title = AppText.Get("ExternalLink_FailedTitle");
             StatusInfoBar.Message = e.DestinationOrigin?.ToString() ?? e.Destination.Scheme;
             StatusInfoBar.Severity = InfoBarSeverity.Error;
+        }
+    }
+
+    private void OnConsoleMessageReceived(object? sender, ServiceConsoleMessageReceivedEventArgs e)
+    {
+        if (_webConsoleLog is not null)
+        {
+            _ = _webConsoleLog.AppendAsync(e.Message);
         }
     }
 
@@ -1824,7 +1860,8 @@ public sealed partial class MainPage : Page
             service.Id,
             home,
             _contentMapping,
-            service.UserAgent);
+            service.UserAgent,
+            _diagnosticsEnabled);
         host.StateChanged += OnHostStateChanged;
         host.PopupRequested += OnPopupRequested;
         host.PermissionRequested += OnPermissionRequested;
@@ -1833,6 +1870,7 @@ public sealed partial class MainPage : Page
         host.NotificationReceived += OnNotificationReceived;
         host.FaviconChanged += OnFaviconChanged;
         host.ExternalNavigationRequested += OnExternalNavigationRequested;
+        host.ConsoleMessageReceived += OnConsoleMessageReceived;
         _hosts.Add(host);
         _states[host.ProfileName] = host.State;
 

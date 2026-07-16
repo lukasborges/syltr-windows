@@ -40,5 +40,3 @@ structure, control placement and service workflows should stay recognizable.
   Chrome-on-Linux spoofing must not be copied without a failing Windows service.
 - Port a website-specific compatibility script only when WebView2 reproduces the
   corresponding failure; the Linux Teams workaround is WebKit-specific.
-- Validate the automatic external-link versus OAuth/SSO classification against
-  real services, including the reported Google-to-corporate-SSO flow.

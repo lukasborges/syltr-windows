@@ -10,6 +10,7 @@
   <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recuperar serviço</value></data>
   <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Medir memória</value></data>
   <data name="TestNotificationMenuItem.Text" xml:space="preserve"><value>Testar notificação do Windows</value></data>
+  <data name="OpenLogsMenuItem.Text" xml:space="preserve"><value>Abrir pasta de diagnósticos</value></data>
   <data name="AboutMenuItem.Text" xml:space="preserve"><value>Sobre o Syltr</value></data>
   <data name="ExitMenuItem.Text" xml:space="preserve"><value>Sair</value></data>
   <data name="Header_MainMenu" xml:space="preserve"><value>Menu principal</value></data>
@@ -143,6 +144,8 @@
   <data name="WindowsNotification_FailedTitle" xml:space="preserve"><value>Falha ao enviar notificação</value></data>
   <data name="Diagnostics_AuthenticationTitle" xml:space="preserve"><value>Teste de autenticação</value></data>
   <data name="Diagnostics_AuthenticationMessage" xml:space="preserve"><value>Cada aba usa um perfil persistente diferente. Faça login com contas distintas para validar a separação.</value></data>
+  <data name="Diagnostics_OpenLogsFailedTitle" xml:space="preserve"><value>Não foi possível abrir os diagnósticos</value></data>
+  <data name="Diagnostics_OpenLogsFailedMessage" xml:space="preserve"><value>O Windows não abriu a pasta de diagnósticos.</value></data>
   <data name="ExternalLink_FailedTitle" xml:space="preserve"><value>Não foi possível abrir o link</value></data>
   <data name="Notification_OpenService" xml:space="preserve"><value>Abrir serviço</value></data>
   <data name="Notification_FallbackMessage" xml:space="preserve"><value>Notificação de {0} · {1}</value></data>

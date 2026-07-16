@@ -309,7 +309,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Collision-free download filenames and completion notification.
 - [x] Custom user-agent per service.
 - [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
-- [ ] Debug console capture and diagnostics.
+- [x] Opt-in debug console capture and diagnostics.
 - [x] Non-destructive configuration import from the Linux application.
 - [x] Portuguese and English resources across the application UI.
 - [ ] Accessibility review and full keyboard navigation.
@@ -409,6 +409,12 @@ Requirements:
 - tolerate missing optional fields;
 - back up configuration before a destructive schema migration;
 - deleting a service profile must require an intentional product action.
+
+With `SYLTR_DEBUG=1`, WebView2 console messages are stored locally in
+`logs/web-console.jsonl`; capture is disabled otherwise. Entries keep only the
+source origin (not paths or query strings), truncate messages at 4 KiB and
+rotate at 2 MiB. Hosted pages control console text, so debug logs may still
+contain account or application data and should be reviewed before sharing.
 
 ## Development
 

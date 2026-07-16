@@ -10,6 +10,7 @@
   <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recover service</value></data>
   <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Measure memory</value></data>
   <data name="TestNotificationMenuItem.Text" xml:space="preserve"><value>Test Windows notification</value></data>
+  <data name="OpenLogsMenuItem.Text" xml:space="preserve"><value>Open diagnostics folder</value></data>
   <data name="AboutMenuItem.Text" xml:space="preserve"><value>About Syltr</value></data>
   <data name="ExitMenuItem.Text" xml:space="preserve"><value>Exit</value></data>
   <data name="Header_MainMenu" xml:space="preserve"><value>Main menu</value></data>
@@ -143,6 +144,8 @@
   <data name="WindowsNotification_FailedTitle" xml:space="preserve"><value>Notification could not be sent</value></data>
   <data name="Diagnostics_AuthenticationTitle" xml:space="preserve"><value>Authentication test</value></data>
   <data name="Diagnostics_AuthenticationMessage" xml:space="preserve"><value>Each tab uses a different persistent profile. Sign in with different accounts to validate separation.</value></data>
+  <data name="Diagnostics_OpenLogsFailedTitle" xml:space="preserve"><value>Diagnostics could not be opened</value></data>
+  <data name="Diagnostics_OpenLogsFailedMessage" xml:space="preserve"><value>Windows did not open the diagnostics folder.</value></data>
   <data name="ExternalLink_FailedTitle" xml:space="preserve"><value>The link could not be opened</value></data>
   <data name="Notification_OpenService" xml:space="preserve"><value>Open service</value></data>
   <data name="Notification_FallbackMessage" xml:space="preserve"><value>Notification from {0} · {1}</value></data>

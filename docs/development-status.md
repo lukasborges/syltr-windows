@@ -9,7 +9,7 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 117 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 122 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -29,6 +29,8 @@ Windows. A auditoria detalhada de paridade continua em
   remoção de perfil, recuperação de processo e captura de memória.
 - Links clicados com `target=_blank` abrem automaticamente no navegador padrão;
   redirects e popups OAuth/SSO permanecem no Syltr sem diálogo intermediário.
+- O fluxo real Google Chat → Google → SSO corporativo e a abertura de links
+  externos no navegador padrão foram validados pelo usuário.
 - Permissões, downloads, favicons, contagem de não lidos, notificações web e
   notificações nativas do Windows.
 - Correção ortográfica gerenciada pelos idiomas e dicionários do Windows, com
@@ -40,6 +42,9 @@ Windows. A auditoria detalhada de paridade continua em
 - Importação não destrutiva do `services.json` Linux pelo menu principal, com
   validação integral, deduplicação, resolução de IDs conflitantes e aviso de
   novo login para os perfis WebView2.
+- Captura opt-in do console WebView2 via `SYLTR_DEBUG=1`, em JSONL local com
+  origem sanitizada, limite por mensagem, rotação e acesso pelo menu de
+  diagnóstico.
 - Atalhos equivalentes ao Linux e atalhos adicionais convencionais do Windows.
 - CI, documentação de contribuição, licença e avisos de terceiros.
 
@@ -59,9 +64,9 @@ Windows. A auditoria detalhada de paridade continua em
 A etapa de fidelidade visual e de fluxo principal está funcional. O próximo
 marco deve começar pelos itens técnicos restantes, nesta ordem:
 
-1. Validar OAuth/SSO e classificação de links externos com serviços reais.
-2. Testar quirks de user-agent e scripts específicos somente nos serviços que
-   apresentarem falha real no Chromium/WebView2.
+1. Iniciar a revisão de acessibilidade e navegação completa por teclado.
+2. Testar quirks de user-agent e scripts específicos somente se um serviço
+   apresentar falha real no Chromium/WebView2.
 
 Ao retomar, execute primeiro:
 

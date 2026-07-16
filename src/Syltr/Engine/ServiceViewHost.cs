@@ -16,7 +16,9 @@ public sealed class ServiceViewHost : IDisposable
     private Uri _homeUri;
     private readonly ServiceViewContentMapping? _contentMapping;
     private readonly string _externalLinkMessageToken = ExternalLinkClickBridge.CreateToken();
+    private readonly bool _captureConsole;
     private string? _userAgent;
+    private CoreWebView2DevToolsProtocolEventReceiver? _consoleEventReceiver;
     private readonly HashSet<DownloadTracker> _downloads = [];
     private TaskCompletionSource<bool>? _initialNavigation;
     private CoreWebView2Profile? _profile;
@@ -29,7 +31,8 @@ public sealed class ServiceViewHost : IDisposable
         string serviceId,
         Uri homeUri,
         ServiceViewContentMapping? contentMapping = null,
-        string? userAgent = null)
+        string? userAgent = null,
+        bool captureConsole = false)
     {
         ArgumentNullException.ThrowIfNull(environmentProvider);
         ArgumentNullException.ThrowIfNull(homeUri);
@@ -45,6 +48,7 @@ public sealed class ServiceViewHost : IDisposable
         _homeUri = homeUri;
         _contentMapping = contentMapping;
         _userAgent = NormalizeUserAgent(userAgent);
+        _captureConsole = captureConsole;
     }
 
     public string ProfileName { get; }
@@ -71,6 +75,8 @@ public sealed class ServiceViewHost : IDisposable
 
     public event EventHandler<ServiceExternalNavigationRequestedEventArgs>? ExternalNavigationRequested;
 
+    public event EventHandler<ServiceConsoleMessageReceivedEventArgs>? ConsoleMessageReceived;
+
     public Task InitializeAsync() => InitializeCoreAsync(navigateHome: true);
 
     private async Task InitializeCoreAsync(bool navigateHome)
@@ -93,6 +99,10 @@ public sealed class ServiceViewHost : IDisposable
             _profile = _webView.CoreWebView2.Profile;
             _webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
             _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+            if (_captureConsole)
+            {
+                await TryEnableConsoleCaptureAsync();
+            }
             await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
                 ExternalLinkClickBridge.CreateScript(_externalLinkMessageToken));
             if (_userAgent is not null)
@@ -320,6 +330,40 @@ public sealed class ServiceViewHost : IDisposable
         UpdateState(ServiceViewStatus.Closed);
     }
 
+    private async Task TryEnableConsoleCaptureAsync()
+    {
+        try
+        {
+            _consoleEventReceiver = _webView.CoreWebView2
+                .GetDevToolsProtocolEventReceiver("Runtime.consoleAPICalled");
+            _consoleEventReceiver.DevToolsProtocolEventReceived += OnConsoleMessageReceived;
+            await _webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Runtime.enable", "{}");
+        }
+        catch
+        {
+            if (_consoleEventReceiver is not null)
+            {
+                _consoleEventReceiver.DevToolsProtocolEventReceived -= OnConsoleMessageReceived;
+                _consoleEventReceiver = null;
+            }
+        }
+    }
+
+    private void OnConsoleMessageReceived(
+        object? sender,
+        CoreWebView2DevToolsProtocolEventReceivedEventArgs args)
+    {
+        if (WebConsoleMessageParser.TryParse(
+                ProfileName,
+                args.ParameterObjectAsJson,
+                out var message))
+        {
+            ConsoleMessageReceived?.Invoke(
+                this,
+                new ServiceConsoleMessageReceivedEventArgs(message));
+        }
+    }
+
     private void OnNavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
     {
         UpdateState(ServiceViewStatus.Navigating);
@@ -409,7 +453,8 @@ public sealed class ServiceViewHost : IDisposable
                 ProfileName,
                 _homeUri,
                 _contentMapping,
-                _userAgent);
+                _userAgent,
+                _captureConsole);
             var requestedUri = Uri.TryCreate(args.Uri, UriKind.Absolute, out var uri) ? uri : null;
             var request = new ServicePopupRequestedEventArgs(
                 popupHost,
@@ -738,6 +783,11 @@ public sealed class ServiceViewHost : IDisposable
         _webView.CoreWebView2.DownloadStarting -= OnDownloadStarting;
         _webView.CoreWebView2.NotificationReceived -= OnNotificationReceived;
         _webView.CoreWebView2.FaviconChanged -= OnFaviconChanged;
+        if (_consoleEventReceiver is not null)
+        {
+            _consoleEventReceiver.DevToolsProtocolEventReceived -= OnConsoleMessageReceived;
+            _consoleEventReceiver = null;
+        }
         foreach (var download in _downloads.ToArray())
         {
             download.Detach();
