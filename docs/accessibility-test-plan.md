@@ -5,6 +5,21 @@ headings, live status region and keyboard-only actions. The following runtime
 pass remains required on Windows before the accessibility roadmap item is
 complete.
 
+## Automated runtime probe
+
+Validated with Windows UI Automation on 16 July 2026:
+
+- the localized header controls and service rail are present in the control
+  view with distinct accessible names;
+- `Tab` traverses the header actions, do-not-disturb control and selected
+  service before entering the hosted page;
+- the catalog exposes localized category headings and distinct names for its
+  search, custom-service action and service rows;
+- catalog focus starts in search and `Esc` closes the owned window.
+
+The checks below remain manual because UI Automation cannot validate spoken
+Narrator output, visible focus quality, color perception or scaled layout.
+
 ## Keyboard-only
 
 1. Traverse the header, service rail, hosted page and do-not-disturb control

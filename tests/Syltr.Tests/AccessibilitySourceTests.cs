@@ -15,6 +15,8 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("Key=\"F10\" Modifiers=\"Shift\"", xaml);
         Assert.Contains("AutomationProperties.SetHelpText(ServiceRail", code);
         Assert.Contains("AutomationProperties.SetName(InstanceSelector", code);
+        Assert.Contains("AutomationProperties.Name=\"{Binding AccessibleName}\"", xaml);
+        Assert.Contains("ServiceRail_ItemWithUnreadAutomationName", code);
         Assert.Contains("ResourceDictionary x:Key=\"HighContrast\"", xaml);
         Assert.Contains("SystemColorHighlightColorBrush", xaml);
         Assert.Contains("Style x:Key=\"HeaderSymbolIconViewboxStyle\" TargetType=\"Viewbox\"", xaml);

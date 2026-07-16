@@ -10,8 +10,8 @@ persisted service ID.
 
 This decision began with the browser-storage gate. Authentication, OAuth/SSO
 popups and the now-implemented permission, notification, download and process
-recovery routes still require their remaining real-service/runtime validation
-before Phase 2 is complete.
+recovery routes remain part of the continuous real-service compatibility
+matrix.
 
 ## Test setup
 
@@ -52,8 +52,10 @@ created; both recovered their prior values and `profile-c` remained absent.
 The Gmail and Microsoft Teams entry pages were then loaded in both remaining
 profiles. UI Automation exposed separate Chromium accessibility profiles for
 the two views (`Profile 2` and `Profile 3`), and both Google and Microsoft email
-forms remained responsive. No credentials were entered, so successful login,
-cookie persistence and account separation are not yet claimed.
+forms remained responsive. In a later MVP session, the user completed the real
+Google Chat → Google → corporate SSO flow and confirmed that the redirects and
+popup remained in Syltr. Broad two-account and Microsoft session-persistence
+coverage is still tracked by the compatibility matrix.
 
 The relaunched application remained responsive with eight WebView2 processes
 sharing the same environment. No spike failure log was produced.
@@ -86,8 +88,8 @@ failures are left to WebView2's automatic recovery.
   user data directory.
 - The configured service list is the source of truth. A deleted profile must not
   be recreated unless the user explicitly adds that service instance again.
-- Popup WebViews can reuse the opener profile under the shared environment; real
-  OAuth/SSO providers still need validation.
+- Popup WebViews can reuse the opener profile under the shared environment; the
+  validated Google/corporate SSO flow confirms the primary real-provider path.
 - Real login tests remain mandatory because local storage isolation alone does
   not prove cookie, authentication broker or OAuth popup behavior.
 - Permission decisions can be persisted by WebView2 within the originating

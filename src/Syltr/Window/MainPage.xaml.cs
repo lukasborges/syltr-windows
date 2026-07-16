@@ -1929,6 +1929,7 @@ public sealed partial class MainPage : Page
         private ServiceRailItem _activeItem;
         private string _displayName;
         private string _unreadText = string.Empty;
+        private ulong _unreadCount;
         private Microsoft.UI.Xaml.Visibility _unreadVisibility = Microsoft.UI.Xaml.Visibility.Collapsed;
 
         public ServiceRailGroupItem(string key, ServiceRailItem firstItem)
@@ -1974,8 +1975,13 @@ public sealed partial class MainPage : Page
 
                 _displayName = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
             }
         }
+
+        public string AccessibleName => _unreadCount > 0
+            ? AppText.Format("ServiceRail_ItemWithUnreadAutomationName", DisplayName, _unreadCount)
+            : DisplayName;
 
         public string UnreadText
         {
@@ -2022,6 +2028,7 @@ public sealed partial class MainPage : Page
         public void RefreshUnread()
         {
             var total = Items.Aggregate(0UL, (sum, item) => sum + item.UnreadCount);
+            _unreadCount = total;
             UnreadText = total switch
             {
                 0 => string.Empty,
@@ -2031,6 +2038,7 @@ public sealed partial class MainPage : Page
             UnreadVisibility = total > 0
                 ? Microsoft.UI.Xaml.Visibility.Visible
                 : Microsoft.UI.Xaml.Visibility.Collapsed;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
         }
     }
 }

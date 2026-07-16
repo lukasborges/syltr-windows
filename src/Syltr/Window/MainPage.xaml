@@ -385,7 +385,7 @@
                             <Grid
                                 Width="48"
                                 Height="48"
-                                AutomationProperties.Name="{Binding DisplayName}"
+                                AutomationProperties.Name="{Binding AccessibleName}"
                                 Opacity="{Binding ActiveItem.Tile.Opacity}"
                                 ToolTipService.ToolTip="{Binding DisplayName}">
                                 <Border

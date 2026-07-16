@@ -111,6 +111,7 @@
   <data name="Category_AI" xml:space="preserve"><value>Artificial intelligence</value></data>
   <data name="ServiceRail_AutomationName" xml:space="preserve"><value>Services</value></data>
   <data name="ServiceRail_HelpText" xml:space="preserve"><value>Use the arrow keys to select a service and Shift+F10 to open its actions.</value></data>
+  <data name="ServiceRail_ItemWithUnreadAutomationName" xml:space="preserve"><value>{0}, unread count: {1}</value></data>
   <data name="InstanceSelector_AutomationName" xml:space="preserve"><value>Service instances</value></data>
   <data name="Diagnostics_LocalTarget" xml:space="preserve"><value>Local diagnostics</value></data>
   <data name="Status_InitializingServices" xml:space="preserve"><value>Initializing services…</value></data>

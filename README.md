@@ -12,7 +12,7 @@ This repository aims to be a nearly faithful Windows-native version of that proj
 
 ## Project status
 
-The repository currently contains a working native MVP shell and WebView2 diagnostic tooling:
+The repository currently contains a working native MVP and WebView2 diagnostic tooling:
 
 - .NET 10;
 - WinUI 3 and Windows App SDK 2.2;
@@ -249,11 +249,13 @@ Exit criterion: catalog and service configuration can be created, saved, loaded 
 
 This is the most important technical gate.
 
-Status: **basic profile storage isolation proven**. Three named profiles have
-been validated against the same origin across an application restart. See
+Status: **profile isolation and the primary authentication flow proven**. Three
+named profiles have been validated against the same origin across an
+application restart. See
 [`docs/architecture/0002-webview2-profile-isolation-spike.md`](docs/architecture/0002-webview2-profile-isolation-spike.md).
-Google and Microsoft sign-in entry pages have loaded in separate profiles, but
-credentialed authentication is still pending.
+The real Google Chat → Google → corporate SSO flow was validated by the user in
+the originating profile. Broader multi-account and Microsoft validation remains
+part of the continuous compatibility matrix.
 Camera, microphone, geolocation, notification and clipboard requests now pass
 through a native per-origin/per-profile confirmation dialog; validation on real
 devices and services is still pending.
@@ -319,7 +321,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [ ] x64 release first; ARM64 after validation.
 - [ ] Upgrade and uninstall behavior.
 - [ ] Privacy, telemetry and diagnostic policy.
-- [ ] License and third-party notices.
+- [x] License and third-party notices.
 - [ ] Beta release and feedback loop.
 
 ## Compatibility test matrix
@@ -545,8 +547,9 @@ Service names and logos may be trademarks of their respective owners. Before dis
 
 ## Immediate next steps
 
-1. Complete credentialed Google and Microsoft multi-account authentication tests.
-2. Validate the native permission flow with real camera, microphone and location devices.
-3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
-4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
-5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
+1. Complete the runtime keyboard, Narrator, high-contrast and scaling pass in
+   [`docs/accessibility-test-plan.md`](docs/accessibility-test-plan.md).
+2. Validate a service-specific user-agent rule or compatibility script only
+   when a real service demonstrates a Chromium/WebView2 failure.
+3. Start release hardening: the core-service test matrix, Release MSIX,
+   package identity/signing, WebView2 prerequisite handling and upgrade tests.
