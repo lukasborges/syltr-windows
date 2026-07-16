@@ -97,6 +97,7 @@
   <data name="State_DisabledMessage" xml:space="preserve"><value>Use o menu de clique direito para reativar sem perder a sessão.</value></data>
   <data name="AddService_Title" xml:space="preserve"><value>Adicionar serviço</value></data>
   <data name="AddService_SearchPlaceholder" xml:space="preserve"><value>Buscar serviços</value></data>
+  <data name="AddService_SearchAutomationName" xml:space="preserve"><value>Buscar no catálogo de serviços</value></data>
   <data name="AddService_Custom" xml:space="preserve"><value>Adicionar serviço personalizado</value></data>
   <data name="AddService_AddEntry" xml:space="preserve"><value>Adicionar {0}</value></data>
   <data name="Category_Messaging" xml:space="preserve"><value>Mensagens</value></data>
@@ -108,6 +109,8 @@
   <data name="Category_Development" xml:space="preserve"><value>Desenvolvimento</value></data>
   <data name="Category_AI" xml:space="preserve"><value>Inteligência artificial</value></data>
   <data name="ServiceRail_AutomationName" xml:space="preserve"><value>Serviços</value></data>
+  <data name="ServiceRail_HelpText" xml:space="preserve"><value>Use as setas para selecionar um serviço e Shift+F10 para abrir suas ações.</value></data>
+  <data name="InstanceSelector_AutomationName" xml:space="preserve"><value>Instâncias do serviço</value></data>
   <data name="Diagnostics_LocalTarget" xml:space="preserve"><value>Diagnóstico local</value></data>
   <data name="Status_InitializingServices" xml:space="preserve"><value>Inicializando os serviços…</value></data>
   <data name="Status_NoServicesTitle" xml:space="preserve"><value>Nenhum serviço configurado</value></data>

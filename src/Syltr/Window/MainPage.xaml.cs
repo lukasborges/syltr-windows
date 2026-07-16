@@ -65,6 +65,8 @@ public sealed partial class MainPage : Page
         LocalizeHeaderButton(HomeButton, "Header_Home", "Header_Home_Tooltip");
         LocalizeHeaderButton(DoNotDisturbButton, "Header_DoNotDisturb", "Header_DoNotDisturb_Tooltip");
         AutomationProperties.SetName(ServiceRail, AppText.Get("ServiceRail_AutomationName"));
+        AutomationProperties.SetHelpText(ServiceRail, AppText.Get("ServiceRail_HelpText"));
+        AutomationProperties.SetName(InstanceSelector, AppText.Get("InstanceSelector_AutomationName"));
         LocalDiagnosticTargetItem.Content = AppText.Get("Diagnostics_LocalTarget");
         StatusInfoBar.Message = AppText.Get("Status_InitializingServices");
     }
@@ -331,6 +333,24 @@ public sealed partial class MainPage : Page
 
         ServiceRail.SelectedItem = group;
         SelectRailContent();
+        ShowServiceContextMenu(group, container);
+        e.Handled = true;
+    }
+
+    private void OnServiceContextMenuAccelerator(
+        Microsoft.UI.Xaml.Input.KeyboardAccelerator sender,
+        Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (ServiceRail.SelectedItem is ServiceRailGroupItem group
+            && ServiceRail.ContainerFromItem(group) is ListViewItem container)
+        {
+            ShowServiceContextMenu(group, container);
+            args.Handled = true;
+        }
+    }
+
+    private void ShowServiceContextMenu(ServiceRailGroupItem group, ListViewItem container)
+    {
         var railItem = group.ActiveItem;
         var service = _services.FirstOrDefault(configured =>
             WebViewProfileName.FromServiceId(configured.Id) == railItem.Host.ProfileName);
@@ -381,7 +401,6 @@ public sealed partial class MainPage : Page
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(remove);
         menu.ShowAt(container);
-        e.Handled = true;
     }
 
     private async Task SetSelectedServiceMutedAsync(bool muted)

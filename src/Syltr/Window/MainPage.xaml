@@ -277,6 +277,7 @@
             <Grid x:Name="TitleDragRegion" Grid.Column="1" Background="Transparent">
                 <TextBlock
                     x:Name="ServiceTitleText"
+                    AutomationProperties.HeadingLevel="Level1"
                     MaxWidth="420"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -320,6 +321,9 @@
                     RightTapped="OnServiceRailRightTapped"
                     SelectionChanged="OnProfileSelectionChanged"
                     SelectionMode="Single">
+                    <ListView.KeyboardAccelerators>
+                        <KeyboardAccelerator Invoked="OnServiceContextMenuAccelerator" Key="F10" Modifiers="Shift" />
+                    </ListView.KeyboardAccelerators>
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid
@@ -406,6 +410,7 @@
                             HorizontalAlignment="Center" />
                         <TextBlock
                             x:Name="ServiceStateTitle"
+                            AutomationProperties.HeadingLevel="Level2"
                             HorizontalAlignment="Center"
                             FontSize="22"
                             FontWeight="SemiBold"
@@ -431,6 +436,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     AutomationProperties.AutomationId="StatusInfoBar"
+                    AutomationProperties.LiveSetting="Polite"
                     Closed="OnStatusInfoBarClosed"
                     IsClosable="True"
                     IsOpen="True"

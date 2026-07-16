@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -18,7 +19,9 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
     private const int OwnerWindowIndex = -8;
     private readonly nint _ownerHandle;
     private readonly TaskCompletionSource<AddServiceWindowResult?> _completion = new();
+    private AutoSuggestBox? _searchBox;
     private AddServiceWindowResult? _result;
+    private bool _initialFocusSet;
 
     public AddServiceWindow(Microsoft.UI.Xaml.Window owner)
     {
@@ -60,6 +63,8 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
             QueryIcon = new SymbolIcon(Symbol.Find),
             HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch
         };
+        _searchBox = searchBox;
+        AutomationProperties.SetName(searchBox, AppText.Get("AddService_SearchAutomationName"));
         var customButton = new Button
         {
             Width = 36,
@@ -95,13 +100,15 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
         {
             var rows = new StackPanel { Spacing = 2 };
             var section = new StackPanel { Spacing = 6 };
-            section.Children.Add(new TextBlock
+            var heading = new TextBlock
             {
                 Text = CategoryDisplayName(category),
                 Margin = new Microsoft.UI.Xaml.Thickness(4, 0, 0, 0),
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 Foreground = (Brush)Microsoft.UI.Xaml.Application.Current.Resources["TextFillColorSecondaryBrush"]
-            });
+            };
+            AutomationProperties.SetHeadingLevel(heading, AutomationHeadingLevel.Level2);
+            section.Children.Add(heading);
             section.Children.Add(rows);
 
             var windowRows = new List<CatalogWindowRow>();
@@ -200,6 +207,14 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
             Height = new Microsoft.UI.Xaml.GridLength(1, Microsoft.UI.Xaml.GridUnitType.Star)
         });
         root.Children.Add(searchRow);
+        root.KeyDown += (_, args) =>
+        {
+            if (args.Key == Windows.System.VirtualKey.Escape)
+            {
+                args.Handled = true;
+                Close();
+            }
+        };
         var catalogScroll = new ScrollViewer
         {
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
@@ -216,6 +231,11 @@ public sealed class AddServiceWindow : Microsoft.UI.Xaml.Window
         if (args.WindowActivationState != Microsoft.UI.Xaml.WindowActivationState.Deactivated)
         {
             EnableWindow(_ownerHandle, false);
+            if (!_initialFocusSet)
+            {
+                _initialFocusSet = true;
+                DispatcherQueue.TryEnqueue(() => _searchBox?.Focus(Microsoft.UI.Xaml.FocusState.Programmatic));
+            }
         }
     }
 

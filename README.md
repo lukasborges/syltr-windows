@@ -312,7 +312,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Opt-in debug console capture and diagnostics.
 - [x] Non-destructive configuration import from the Linux application.
 - [x] Portuguese and English resources across the application UI.
-- [ ] Accessibility review and full keyboard navigation.
+- [ ] Accessibility review and full keyboard navigation (implementation complete; Narrator/high-contrast runtime pass pending).
 
 ### Phase 5 — Hardening and distribution
 

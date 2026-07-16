@@ -9,7 +9,7 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 122 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 124 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -45,6 +45,9 @@ Windows. A auditoria detalhada de paridade continua em
 - Captura opt-in do console WebView2 via `SYLTR_DEBUG=1`, em JSONL local com
   origem sanitizada, limite por mensagem, rotação e acesso pelo menu de
   diagnóstico.
+- Base de acessibilidade com nomes localizados, títulos semânticos, status como
+  região viva, foco inicial e `Esc` no catálogo e menu contextual do rail por
+  `Shift+F10`.
 - Atalhos equivalentes ao Linux e atalhos adicionais convencionais do Windows.
 - CI, documentação de contribuição, licença e avisos de terceiros.
 
@@ -64,7 +67,8 @@ Windows. A auditoria detalhada de paridade continua em
 A etapa de fidelidade visual e de fluxo principal está funcional. O próximo
 marco deve começar pelos itens técnicos restantes, nesta ordem:
 
-1. Iniciar a revisão de acessibilidade e navegação completa por teclado.
+1. Executar o roteiro manual de Narrador, alto contraste, escala e teclado em
+   [`accessibility-test-plan.md`](accessibility-test-plan.md).
 2. Testar quirks de user-agent e scripts específicos somente se um serviço
    apresentar falha real no Chromium/WebView2.
 
