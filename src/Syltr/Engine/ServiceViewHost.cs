@@ -8,7 +8,7 @@ namespace Syltr.Engine;
 /// <summary>
 /// Hosts one isolated service profile without exposing CoreWebView2 to the window layer.
 /// </summary>
-public sealed class ServiceViewHost : IDisposable
+public sealed partial class ServiceViewHost : IDisposable
 {
     private readonly WebViewEnvironmentProvider _environmentProvider;
     private readonly Grid _content = new();
@@ -19,7 +19,7 @@ public sealed class ServiceViewHost : IDisposable
     private readonly bool _captureConsole;
     private string? _userAgent;
     private CoreWebView2DevToolsProtocolEventReceiver? _consoleEventReceiver;
-    private readonly HashSet<DownloadTracker> _downloads = [];
+    private readonly HashSet<WebViewDownloadTracker> _downloads = [];
     private TaskCompletionSource<bool>? _initialNavigation;
     private CoreWebView2Profile? _profile;
     private bool _initialized;
@@ -48,7 +48,7 @@ public sealed class ServiceViewHost : IDisposable
         ProfileName = WebViewProfileName.FromServiceId(serviceId);
         _homeUri = homeUri;
         _contentMapping = contentMapping;
-        _userAgent = NormalizeUserAgent(userAgent);
+        _userAgent = WebViewRequestPolicy.NormalizeUserAgent(userAgent);
         _captureConsole = captureConsole;
     }
 
@@ -93,50 +93,14 @@ public sealed class ServiceViewHost : IDisposable
         UpdateState(ServiceViewStatus.Initializing);
         try
         {
-            var environment = await _environmentProvider.GetAsync();
-            var controllerOptions = environment.CreateCoreWebView2ControllerOptions();
-            controllerOptions.ProfileName = ProfileName;
-            controllerOptions.IsInPrivateModeEnabled = false;
-
-            await _webView.EnsureCoreWebView2Async(environment, controllerOptions);
-            _profile = _webView.CoreWebView2.Profile;
-            ApplyMemoryUsageTarget();
-            _webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
-            _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
-            if (_captureConsole)
-            {
-                await TryEnableConsoleCaptureAsync();
-            }
-            await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
-                ExternalLinkClickBridge.CreateScript(_externalLinkMessageToken));
-            if (_userAgent is not null)
-            {
-                _webView.CoreWebView2.Settings.UserAgent = _userAgent;
-            }
-            if (_contentMapping is not null)
-            {
-                _webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                    _contentMapping.HostName,
-                    _contentMapping.FolderPath,
-                    CoreWebView2HostResourceAccessKind.DenyCors);
-            }
-
-            _webView.NavigationStarting += OnNavigationStarting;
-            _webView.NavigationCompleted += OnNavigationCompleted;
-            _webView.CoreWebView2.DocumentTitleChanged += OnDocumentTitleChanged;
-            _webView.CoreWebView2.ProcessFailed += OnProcessFailed;
-            _webView.CoreWebView2.NewWindowRequested += OnNewWindowRequested;
-            _webView.CoreWebView2.PermissionRequested += OnPermissionRequested;
-            _webView.CoreWebView2.DownloadStarting += OnDownloadStarting;
-            _webView.CoreWebView2.NotificationReceived += OnNotificationReceived;
-            _webView.CoreWebView2.FaviconChanged += OnFaviconChanged;
+            await CreateCoreWebViewAsync();
+            await ConfigureCoreWebViewAsync();
+            AttachCoreEvents();
             _initialized = true;
             UpdateState(ServiceViewStatus.Ready);
             if (navigateHome)
             {
-                _initialNavigation = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                NavigateHome();
-                await _initialNavigation.Task;
+                await NavigateHomeInitiallyAsync();
             }
         }
         catch (Exception exception)
@@ -144,6 +108,73 @@ public sealed class ServiceViewHost : IDisposable
             UpdateState(ServiceViewStatus.Failed, exception.Message);
             throw;
         }
+    }
+
+    private async Task CreateCoreWebViewAsync()
+    {
+        var environment = await _environmentProvider.GetAsync();
+        var options = environment.CreateCoreWebView2ControllerOptions();
+        options.ProfileName = ProfileName;
+        options.IsInPrivateModeEnabled = false;
+        await _webView.EnsureCoreWebView2Async(environment, options);
+        _profile = _webView.CoreWebView2.Profile;
+        ApplyMemoryUsageTarget();
+    }
+
+    private async Task ConfigureCoreWebViewAsync()
+    {
+        _webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+        if (_captureConsole)
+        {
+            await TryEnableConsoleCaptureAsync();
+        }
+
+        await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+            ExternalLinkClickBridge.CreateScript(_externalLinkMessageToken));
+        ApplyUserAgent();
+        ApplyContentMapping();
+    }
+
+    private void ApplyUserAgent()
+    {
+        if (_userAgent is not null)
+        {
+            _webView.CoreWebView2.Settings.UserAgent = _userAgent;
+        }
+    }
+
+    private void ApplyContentMapping()
+    {
+        if (_contentMapping is null)
+        {
+            return;
+        }
+
+        _webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+            _contentMapping.HostName,
+            _contentMapping.FolderPath,
+            CoreWebView2HostResourceAccessKind.DenyCors);
+    }
+
+    private void AttachCoreEvents()
+    {
+        _webView.NavigationStarting += OnNavigationStarting;
+        _webView.NavigationCompleted += OnNavigationCompleted;
+        _webView.CoreWebView2.DocumentTitleChanged += OnDocumentTitleChanged;
+        _webView.CoreWebView2.ProcessFailed += OnProcessFailed;
+        _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+        _webView.CoreWebView2.NewWindowRequested += OnNewWindowRequested;
+        _webView.CoreWebView2.PermissionRequested += OnPermissionRequested;
+        _webView.CoreWebView2.DownloadStarting += OnDownloadStarting;
+        _webView.CoreWebView2.NotificationReceived += OnNotificationReceived;
+        _webView.CoreWebView2.FaviconChanged += OnFaviconChanged;
+    }
+
+    private async Task NavigateHomeInitiallyAsync()
+    {
+        _initialNavigation = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        NavigateHome();
+        await _initialNavigation.Task;
     }
 
     public void NavigateHome()
@@ -182,7 +213,7 @@ public sealed class ServiceViewHost : IDisposable
     public void SetUserAgent(string? userAgent, bool reload = true)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        _userAgent = NormalizeUserAgent(userAgent);
+        _userAgent = WebViewRequestPolicy.NormalizeUserAgent(userAgent);
         if (!_initialized)
         {
             return;
@@ -344,371 +375,6 @@ public sealed class ServiceViewHost : IDisposable
         UpdateState(ServiceViewStatus.Closed);
     }
 
-    private async Task TryEnableConsoleCaptureAsync()
-    {
-        try
-        {
-            _consoleEventReceiver = _webView.CoreWebView2
-                .GetDevToolsProtocolEventReceiver("Runtime.consoleAPICalled");
-            _consoleEventReceiver.DevToolsProtocolEventReceived += OnConsoleMessageReceived;
-            await _webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Runtime.enable", "{}");
-        }
-        catch
-        {
-            if (_consoleEventReceiver is not null)
-            {
-                _consoleEventReceiver.DevToolsProtocolEventReceived -= OnConsoleMessageReceived;
-                _consoleEventReceiver = null;
-            }
-        }
-    }
-
-    private void OnConsoleMessageReceived(
-        object? sender,
-        CoreWebView2DevToolsProtocolEventReceivedEventArgs args)
-    {
-        if (WebConsoleMessageParser.TryParse(
-                ProfileName,
-                args.ParameterObjectAsJson,
-                out var message))
-        {
-            ConsoleMessageReceived?.Invoke(
-                this,
-                new ServiceConsoleMessageReceivedEventArgs(message));
-        }
-    }
-
-    private void OnNavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
-    {
-        UpdateState(ServiceViewStatus.Navigating);
-    }
-
-    private void OnWebMessageReceived(
-        CoreWebView2 sender,
-        CoreWebView2WebMessageReceivedEventArgs args)
-    {
-        string message;
-        try
-        {
-            message = args.TryGetWebMessageAsString();
-        }
-        catch
-        {
-            return;
-        }
-
-        if (!ExternalLinkClickBridge.TryParseMessage(
-                message,
-                _externalLinkMessageToken,
-                out var destination))
-        {
-            return;
-        }
-
-        ExternalNavigationRequested?.Invoke(
-            this,
-            new ServiceExternalNavigationRequestedEventArgs(ProfileName, destination));
-    }
-
-    internal async Task<string> ExecuteScriptAsync(string script)
-    {
-        EnsureReady();
-        ArgumentException.ThrowIfNullOrWhiteSpace(script);
-        return await _webView.ExecuteScriptAsync(script);
-    }
-
-    private void OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
-    {
-        if (args.IsSuccess)
-        {
-            UpdateState(ServiceViewStatus.Ready);
-            _initialNavigation?.TrySetResult(true);
-            return;
-        }
-
-        var message = $"Navigation failed: {args.WebErrorStatus}";
-        UpdateState(ServiceViewStatus.Failed, message);
-        _initialNavigation?.TrySetException(new InvalidOperationException(message));
-    }
-
-    private void OnDocumentTitleChanged(CoreWebView2 sender, object args) =>
-        UpdateState(_state.Status);
-
-    private void OnProcessFailed(CoreWebView2 sender, CoreWebView2ProcessFailedEventArgs args)
-    {
-        var failureKind = args.ProcessFailedKind switch
-        {
-            CoreWebView2ProcessFailedKind.BrowserProcessExited => ServiceViewProcessFailureKind.BrowserExited,
-            CoreWebView2ProcessFailedKind.RenderProcessExited => ServiceViewProcessFailureKind.RendererExited,
-            CoreWebView2ProcessFailedKind.RenderProcessUnresponsive => ServiceViewProcessFailureKind.RendererUnresponsive,
-            _ => ServiceViewProcessFailureKind.NonFatal
-        };
-        var recoveryAction = ServiceViewRecoveryPolicy.ForProcessFailure(failureKind);
-        if (recoveryAction == ServiceViewRecoveryAction.None)
-        {
-            return;
-        }
-
-        var message = $"WebView2 process failed: {args.ProcessFailedKind} ({args.Reason})";
-        UpdateState(ServiceViewStatus.Failed, message, recoveryAction);
-        _initialNavigation?.TrySetException(new InvalidOperationException(message));
-    }
-
-    private async void OnNewWindowRequested(
-        CoreWebView2 sender,
-        CoreWebView2NewWindowRequestedEventArgs args)
-    {
-        var deferral = args.GetDeferral();
-        ServiceViewHost? popupHost = null;
-        try
-        {
-            popupHost = new ServiceViewHost(
-                _environmentProvider,
-                ProfileName,
-                _homeUri,
-                _contentMapping,
-                _userAgent,
-                _captureConsole);
-            var requestedUri = Uri.TryCreate(args.Uri, UriKind.Absolute, out var uri) ? uri : null;
-            var request = new ServicePopupRequestedEventArgs(
-                popupHost,
-                requestedUri,
-                args.IsUserInitiated,
-                requestedUri is not null && HasSameOrigin(_homeUri, requestedUri));
-            var handler = PopupRequested;
-            if (handler is null)
-            {
-                request.Cancel();
-            }
-            else
-            {
-                handler.Invoke(this, request);
-            }
-
-            var disposition = await request.WaitForDecisionAsync();
-            if (disposition is not ServicePopupDisposition.InApp)
-            {
-                args.Handled = true;
-                popupHost.Dispose();
-                return;
-            }
-
-            await popupHost.InitializeCoreAsync(navigateHome: false);
-            args.NewWindow = popupHost._webView.CoreWebView2;
-            args.Handled = true;
-        }
-        catch
-        {
-            args.Handled = true;
-            popupHost?.Dispose();
-        }
-        finally
-        {
-            deferral.Complete();
-        }
-    }
-
-    private async void OnPermissionRequested(
-        CoreWebView2 sender,
-        CoreWebView2PermissionRequestedEventArgs args)
-    {
-        var deferral = args.GetDeferral();
-        try
-        {
-            var origin = CreateSafeOrigin(args.Uri);
-            var request = new ServicePermissionRequestedEventArgs(
-                ProfileName,
-                origin,
-                MapPermissionKind(args.PermissionKind),
-                args.IsUserInitiated);
-
-            var handler = PermissionRequested;
-            if (handler is null)
-            {
-                request.Deny(rememberForProfile: false);
-            }
-            else
-            {
-                handler.Invoke(this, request);
-            }
-
-            var response = await request.WaitForDecisionAsync();
-            args.State = response.Decision == ServicePermissionDecision.Allow
-                ? CoreWebView2PermissionState.Allow
-                : CoreWebView2PermissionState.Deny;
-            args.SavesInProfile = response.RememberForProfile;
-            args.Handled = true;
-        }
-        catch
-        {
-            args.State = CoreWebView2PermissionState.Deny;
-            args.SavesInProfile = false;
-            args.Handled = true;
-        }
-        finally
-        {
-            deferral.Complete();
-        }
-    }
-
-    private async void OnDownloadStarting(
-        CoreWebView2 sender,
-        CoreWebView2DownloadStartingEventArgs args)
-    {
-        var deferral = args.GetDeferral();
-        try
-        {
-            var operation = args.DownloadOperation;
-            var suggestedFileName = Path.GetFileName(args.ResultFilePath);
-            if (string.IsNullOrWhiteSpace(suggestedFileName))
-            {
-                suggestedFileName = "download";
-            }
-
-            var request = new ServiceDownloadRequestedEventArgs(
-                ProfileName,
-                CreateSafeOrigin(operation.Uri),
-                suggestedFileName,
-                operation.MimeType,
-                operation.TotalBytesToReceive);
-            var handler = DownloadRequested;
-            if (handler is null)
-            {
-                request.Cancel();
-            }
-            else
-            {
-                handler.Invoke(this, request);
-            }
-
-            var response = await request.WaitForDecisionAsync();
-            args.Handled = true;
-            if (response.Decision == ServiceDownloadDecision.Cancel ||
-                string.IsNullOrWhiteSpace(response.DestinationPath))
-            {
-                args.Cancel = true;
-                return;
-            }
-
-            args.ResultFilePath = response.DestinationPath;
-            var tracker = new DownloadTracker(this, operation, response.DestinationPath);
-            _downloads.Add(tracker);
-            tracker.Attach();
-        }
-        catch
-        {
-            args.Cancel = true;
-            args.Handled = true;
-        }
-        finally
-        {
-            deferral.Complete();
-        }
-    }
-
-    private void OnNotificationReceived(
-        CoreWebView2 sender,
-        CoreWebView2NotificationReceivedEventArgs args)
-    {
-        var handler = NotificationReceived;
-        if (handler is null)
-        {
-            return;
-        }
-
-        var webNotification = args.Notification;
-        args.Handled = true;
-        webNotification.ReportShown();
-        var notification = new ServiceNotification(
-            ProfileName,
-            CreateSafeOrigin(args.SenderOrigin),
-            webNotification.Title ?? string.Empty,
-            webNotification.Body ?? string.Empty,
-            webNotification.Tag ?? string.Empty,
-            webNotification.IsSilent,
-            webNotification.RequiresInteraction);
-        try
-        {
-            handler.Invoke(
-                this,
-                new ServiceNotificationReceivedEventArgs(
-                    notification,
-                    webNotification.ReportClicked,
-                    webNotification.ReportClosed));
-        }
-        catch
-        {
-            try
-            {
-                webNotification.ReportClosed();
-            }
-            catch
-            {
-                // The browser may close while the native handler is unwinding.
-            }
-        }
-    }
-
-    private async void OnFaviconChanged(CoreWebView2 sender, object args)
-    {
-        if (FaviconChanged is null)
-        {
-            return;
-        }
-
-        try
-        {
-            using var randomAccessStream = await sender.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
-            using var stream = randomAccessStream.AsStreamForRead();
-            using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
-            if (buffer.Length is > 0 and <= 1024 * 1024)
-            {
-                FaviconChanged?.Invoke(this, new ServiceFaviconChangedEventArgs(buffer.ToArray()));
-            }
-        }
-        catch
-        {
-            // Initials remain visible when a page has no usable favicon.
-        }
-    }
-
-    private static Uri CreateSafeOrigin(string requestedUri)
-    {
-        if (Uri.TryCreate(requestedUri, UriKind.Absolute, out var uri) &&
-            uri.Scheme is "http" or "https")
-        {
-            return new Uri(uri.GetLeftPart(UriPartial.Authority));
-        }
-
-        return new Uri("https://unknown.invalid");
-    }
-
-    private static bool HasSameOrigin(Uri left, Uri right) =>
-        left.Scheme.Equals(right.Scheme, StringComparison.OrdinalIgnoreCase) &&
-        left.IdnHost.Equals(right.IdnHost, StringComparison.OrdinalIgnoreCase) &&
-        left.Port == right.Port;
-
-    private static string? NormalizeUserAgent(string? userAgent) =>
-        string.IsNullOrWhiteSpace(userAgent) ? null : userAgent.Trim();
-
-    private static ServicePermissionKind MapPermissionKind(CoreWebView2PermissionKind kind) => kind switch
-    {
-        CoreWebView2PermissionKind.Microphone => ServicePermissionKind.Microphone,
-        CoreWebView2PermissionKind.Camera => ServicePermissionKind.Camera,
-        CoreWebView2PermissionKind.Geolocation => ServicePermissionKind.Geolocation,
-        CoreWebView2PermissionKind.Notifications => ServicePermissionKind.Notifications,
-        CoreWebView2PermissionKind.OtherSensors => ServicePermissionKind.OtherSensors,
-        CoreWebView2PermissionKind.ClipboardRead => ServicePermissionKind.ClipboardRead,
-        CoreWebView2PermissionKind.MultipleAutomaticDownloads => ServicePermissionKind.MultipleAutomaticDownloads,
-        CoreWebView2PermissionKind.FileReadWrite => ServicePermissionKind.FileReadWrite,
-        CoreWebView2PermissionKind.Autoplay => ServicePermissionKind.Autoplay,
-        CoreWebView2PermissionKind.LocalFonts => ServicePermissionKind.LocalFonts,
-        CoreWebView2PermissionKind.MidiSystemExclusiveMessages => ServicePermissionKind.MidiSystemExclusiveMessages,
-        CoreWebView2PermissionKind.WindowManagement => ServicePermissionKind.WindowManagement,
-        _ => ServicePermissionKind.Unknown
-    };
-
     private async Task RecreateWebViewAsync(bool navigateHome)
     {
         try
@@ -817,75 +483,4 @@ public sealed class ServiceViewHost : IDisposable
         _downloads.Clear();
     }
 
-    private sealed class DownloadTracker(
-        ServiceViewHost owner,
-        CoreWebView2DownloadOperation operation,
-        string destinationPath)
-    {
-        private readonly Guid _id = Guid.NewGuid();
-        private bool _attached;
-
-        public void Attach()
-        {
-            if (_attached)
-            {
-                return;
-            }
-
-            operation.BytesReceivedChanged += OnProgressChanged;
-            operation.StateChanged += OnStateChanged;
-            _attached = true;
-            Publish();
-        }
-
-        public void Detach()
-        {
-            if (!_attached)
-            {
-                return;
-            }
-
-            operation.BytesReceivedChanged -= OnProgressChanged;
-            operation.StateChanged -= OnStateChanged;
-            _attached = false;
-        }
-
-        private void OnProgressChanged(CoreWebView2DownloadOperation sender, object args) => Publish();
-
-        private void OnStateChanged(CoreWebView2DownloadOperation sender, object args)
-        {
-            Publish();
-            if (operation.State is not CoreWebView2DownloadState.InProgress)
-            {
-                Detach();
-                owner._downloads.Remove(this);
-            }
-        }
-
-        private void Publish()
-        {
-            var status = operation.State switch
-            {
-                CoreWebView2DownloadState.Completed => ServiceDownloadStatus.Completed,
-                CoreWebView2DownloadState.Interrupted => ServiceDownloadStatus.Interrupted,
-                _ => ServiceDownloadStatus.InProgress
-            };
-            long? totalBytes = operation.TotalBytesToReceive > 0
-                ? operation.TotalBytesToReceive
-                : null;
-            owner.DownloadStateChanged?.Invoke(
-                owner,
-                new ServiceDownloadStateChangedEventArgs(new ServiceDownloadState(
-                    _id,
-                    owner.ProfileName,
-                    Path.GetFileName(destinationPath),
-                    destinationPath,
-                    Math.Max(0, operation.BytesReceived),
-                    totalBytes,
-                    status,
-                    status == ServiceDownloadStatus.Interrupted
-                        ? operation.InterruptReason.ToString()
-                        : null)));
-        }
-    }
 }

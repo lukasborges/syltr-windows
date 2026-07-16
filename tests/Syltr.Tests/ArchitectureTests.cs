@@ -49,6 +49,33 @@ public class ArchitectureTests
         });
     }
 
+    [Fact]
+    public void SourceFilesStayFocused()
+    {
+        const int maximumLinesPerFile = 500;
+        var sourceRoot = Path.Combine(FindRepositoryRoot(), "src", "Syltr");
+        var oversizedFiles = Directory
+            .EnumerateFiles(sourceRoot, "*.cs", SearchOption.AllDirectories)
+            .Where(path => !IsBuildArtifact(path))
+            .Select(path => new
+            {
+                Path = Path.GetRelativePath(sourceRoot, path),
+                Lines = File.ReadLines(path).Count()
+            })
+            .Where(file => file.Lines > maximumLinesPerFile)
+            .OrderBy(file => file.Path)
+            .ToArray();
+
+        Assert.True(
+            oversizedFiles.Length == 0,
+            "Keep source files focused by extracting cohesive responsibilities: " +
+            string.Join(", ", oversizedFiles.Select(file => $"{file.Path} ({file.Lines} lines)")));
+    }
+
+    private static bool IsBuildArtifact(string path) =>
+        path.Split(Path.DirectorySeparatorChar)
+            .Any(segment => segment is "bin" or "obj");
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

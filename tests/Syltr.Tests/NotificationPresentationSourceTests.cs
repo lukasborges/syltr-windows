@@ -10,7 +10,7 @@ public sealed class NotificationPresentationSourceTests
             "src",
             "Syltr",
             "Window",
-            "MainPage.xaml.cs"));
+            "MainPage.Integrations.cs"));
 
         Assert.Contains(
             "if (TryShowWindowsNotification(notification, e))",
@@ -39,12 +39,10 @@ public sealed class NotificationPresentationSourceTests
             "Syltr",
             "Window",
             "MainPage.xaml"));
-        var source = File.ReadAllText(Path.Combine(
-            root,
-            "src",
-            "Syltr",
-            "Window",
-            "MainPage.xaml.cs"));
+        var source = string.Join(
+            Environment.NewLine,
+            Directory.GetFiles(Path.Combine(root, "src", "Syltr", "Window"), "MainPage*.cs")
+                .Select(File.ReadAllText));
 
         Assert.Contains("x:Name=\"StatusInfoBar\"", xaml, StringComparison.Ordinal);
         Assert.Contains("IsOpen=\"False\"", xaml, StringComparison.Ordinal);

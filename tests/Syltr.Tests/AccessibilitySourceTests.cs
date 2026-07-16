@@ -8,6 +8,18 @@ public sealed class AccessibilitySourceTests
         var root = FindRepositoryRoot();
         var xaml = File.ReadAllText(Path.Combine(root, "src", "Syltr", "Window", "MainPage.xaml"));
         var code = File.ReadAllText(Path.Combine(root, "src", "Syltr", "Window", "MainPage.xaml.cs"));
+        var integrationCode = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "MainPage.Integrations.cs"));
+        var railCode = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "ServiceRailGroupItem.cs"));
 
         Assert.Contains("AutomationProperties.HeadingLevel=\"Level1\"", xaml);
         Assert.Contains("AutomationProperties.LiveSetting=\"Polite\"", xaml);
@@ -16,7 +28,7 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("AutomationProperties.SetHelpText(ServiceRail", code);
         Assert.Contains("AutomationProperties.SetName(InstanceSelector", code);
         Assert.Contains("AutomationProperties.Name=\"{Binding AccessibleName}\"", xaml);
-        Assert.Contains("ServiceRail_ItemWithUnreadAutomationName", code);
+        Assert.Contains("ServiceRail_ItemWithUnreadAutomationName", railCode);
         Assert.Contains("ResourceDictionary x:Key=\"HighContrast\"", xaml);
         Assert.Contains("SystemColorHighlightColorBrush", xaml);
         Assert.Contains("Style x:Key=\"HeaderSymbolIconViewboxStyle\" TargetType=\"Viewbox\"", xaml);
@@ -32,11 +44,35 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("AllowDrop=\"True\"", xaml);
         Assert.DoesNotContain("ImportServicesMenuItem", xaml);
         Assert.DoesNotContain("DiagnosticsMenuItem", xaml);
-        Assert.Contains("RemoveRailItem(railItem)", code);
+        Assert.Contains("RemoveRailItem(railItem)", integrationCode);
     }
 
     [Fact]
     public void Service_catalog_has_initial_focus_escape_and_accessible_structure()
+    {
+        var root = FindRepositoryRoot();
+        var windowCode = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "AddServiceWindow.cs"));
+        var catalogCode = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "ServiceCatalogView.cs"));
+
+        Assert.Contains("AddService_SearchAutomationName", catalogCode);
+        Assert.Contains("AutomationProperties.SetHeadingLevel", catalogCode);
+        Assert.Contains("VirtualKey.Escape", catalogCode);
+        Assert.Contains("Focus(Microsoft.UI.Xaml.FocusState.Programmatic)", catalogCode);
+        Assert.Contains("DispatcherQueue.TryEnqueue(_catalogView.FocusSearch)", windowCode);
+    }
+
+    [Fact]
+    public void About_dialog_exposes_the_linux_reference_metadata()
     {
         var root = FindRepositoryRoot();
         var code = File.ReadAllText(Path.Combine(
@@ -44,19 +80,7 @@ public sealed class AccessibilitySourceTests
             "src",
             "Syltr",
             "Window",
-            "AddServiceWindow.cs"));
-
-        Assert.Contains("AddService_SearchAutomationName", code);
-        Assert.Contains("AutomationProperties.SetHeadingLevel", code);
-        Assert.Contains("VirtualKey.Escape", code);
-        Assert.Contains("Focus(Microsoft.UI.Xaml.FocusState.Programmatic)", code);
-    }
-
-    [Fact]
-    public void About_dialog_exposes_the_linux_reference_metadata()
-    {
-        var root = FindRepositoryRoot();
-        var code = File.ReadAllText(Path.Combine(root, "src", "Syltr", "Window", "MainPage.xaml.cs"));
+            "MainPageDialogService.cs"));
 
         Assert.Contains("ms-appx:///Assets/Syltr.svg", code);
         Assert.Contains("About_Developer", code);

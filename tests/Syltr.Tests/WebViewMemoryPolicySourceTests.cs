@@ -17,7 +17,7 @@ public sealed class WebViewMemoryPolicySourceTests
             "src",
             "Syltr",
             "Window",
-            "MainPage.xaml.cs"));
+            "MainPage.Services.cs"));
 
         Assert.Contains("ApplyMemoryUsageTarget();", hostSource, StringComparison.Ordinal);
         Assert.Contains("CoreWebView2MemoryUsageTargetLevel.Normal", hostSource, StringComparison.Ordinal);
