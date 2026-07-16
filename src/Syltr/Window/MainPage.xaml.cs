@@ -71,7 +71,6 @@ public sealed partial class MainPage : Page
         AutomationProperties.SetHelpText(ServiceRail, AppText.Get("ServiceRail_HelpText"));
         AutomationProperties.SetName(InstanceSelector, AppText.Get("InstanceSelector_AutomationName"));
         LocalDiagnosticTargetItem.Content = AppText.Get("Diagnostics_LocalTarget");
-        StatusInfoBar.Message = AppText.Get("Status_InitializingServices");
     }
 
     private static void LocalizeHeaderButton(

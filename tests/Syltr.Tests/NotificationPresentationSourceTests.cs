@@ -29,6 +29,28 @@ public sealed class NotificationPresentationSourceTests
         Assert.True(fallback > nativeReturn);
     }
 
+    [Fact]
+    public void Routine_initialization_does_not_open_the_status_overlay()
+    {
+        var root = FindRepositoryRoot();
+        var xaml = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "MainPage.xaml"));
+        var source = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "Syltr",
+            "Window",
+            "MainPage.xaml.cs"));
+
+        Assert.Contains("x:Name=\"StatusInfoBar\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("IsOpen=\"False\"", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Status_InitializingServices", source, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

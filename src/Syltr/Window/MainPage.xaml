@@ -486,7 +486,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Native feedback appears as a compact in-app toast, not as permanent chrome. -->
+                <!-- Important feedback is temporary and starts closed to avoid covering web content. -->
                 <InfoBar
                     x:Name="StatusInfoBar"
                     MaxWidth="520"
@@ -497,7 +497,7 @@
                     AutomationProperties.LiveSetting="Polite"
                     Closed="OnStatusInfoBarClosed"
                     IsClosable="True"
-                    IsOpen="True"
+                    IsOpen="False"
                     Severity="Informational"
                     Title="Syltr" />
             </Grid>

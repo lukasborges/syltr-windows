@@ -11,7 +11,7 @@ Windows. A auditoria detalhada de paridade continua em
 - O aplicativo compila em Debug sem avisos ou erros.
 - O aplicativo compila em Release sem avisos ou erros e o script
   `scripts/build-msix.ps1` gera um MSIX x64 não assinado.
-- A suíte possui 129 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 130 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -63,6 +63,9 @@ Windows. A auditoria detalhada de paridade continua em
 - Notificações web usam exclusivamente o toast nativo do Windows quando ele é
   entregue; o aviso interno fica restrito ao fallback de falha de registro ou
   exibição, evitando cobrir mensagens no serviço hospedado.
+- O aviso rotineiro **Iniciando serviços** não é mais exibido sobre o conteúdo;
+  o `InfoBar` inicia fechado e permanece reservado a erros, alertas e feedback
+  de ações do usuário.
 
 ## Decisões visuais aprovadas
 
