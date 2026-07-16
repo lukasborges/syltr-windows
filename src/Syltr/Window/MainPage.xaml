@@ -228,6 +228,7 @@
                     <Button.Content><SymbolIcon Symbol="GlobalNavigationButton" /></Button.Content>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                            <MenuFlyoutItem x:Uid="ImportServicesMenuItem" Click="OnImportServicesClick" />
                             <MenuFlyoutItem x:Uid="SpellcheckMenuItem" Click="OnSpellcheckClick" />
                             <MenuFlyoutSubItem x:Uid="DiagnosticsMenuItem" x:Name="DiagnosticsMenuItem" Visibility="Collapsed">
                                 <MenuFlyoutItem x:Uid="RecoverMenuItem" Click="OnRecoverClick" />

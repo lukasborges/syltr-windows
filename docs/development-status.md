@@ -9,7 +9,7 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 114 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 117 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -37,6 +37,9 @@ Windows. A auditoria detalhada de paridade continua em
   diálogos, permissões, estados, notificações, downloads e diagnósticos.
 - Configuração JSON atômica com esquema/migração, preferências, ordem dos
   serviços, mute, desativação e user-agent opcional.
+- Importação não destrutiva do `services.json` Linux pelo menu principal, com
+  validação integral, deduplicação, resolução de IDs conflitantes e aviso de
+  novo login para os perfis WebView2.
 - Atalhos equivalentes ao Linux e atalhos adicionais convencionais do Windows.
 - CI, documentação de contribuição, licença e avisos de terceiros.
 
@@ -56,10 +59,8 @@ Windows. A auditoria detalhada de paridade continua em
 A etapa de fidelidade visual e de fluxo principal está funcional. O próximo
 marco deve começar pelos itens técnicos restantes, nesta ordem:
 
-1. Implementar importação compatível do `services.json` do Linux, deixando claro
-   que as contas precisarão de novo login nos perfis WebView2.
-2. Validar OAuth/SSO e classificação de links externos com serviços reais.
-3. Testar quirks de user-agent e scripts específicos somente nos serviços que
+1. Validar OAuth/SSO e classificação de links externos com serviços reais.
+2. Testar quirks de user-agent e scripts específicos somente nos serviços que
    apresentarem falha real no Chromium/WebView2.
 
 Ao retomar, execute primeiro:

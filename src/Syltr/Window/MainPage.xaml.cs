@@ -537,6 +537,109 @@ public sealed partial class MainPage : Page
     private void OnExitClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
         ((App)Microsoft.UI.Xaml.Application.Current).CloseMainWindow();
 
+    private async void OnImportServicesClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (_serviceStore is null || XamlRoot is null)
+        {
+            return;
+        }
+
+        var owner = ((App)Microsoft.UI.Xaml.Application.Current).MainWindowInstance;
+        if (owner is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker
+            {
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary,
+                ViewMode = Windows.Storage.Pickers.PickerViewMode.List
+            };
+            picker.FileTypeFilter.Add(".json");
+            WinRT.Interop.InitializeWithWindow.Initialize(
+                picker,
+                WinRT.Interop.WindowNative.GetWindowHandle(owner));
+
+            var file = await picker.PickSingleFileAsync();
+            if (file is null)
+            {
+                return;
+            }
+
+            var imported = await LinuxServiceImporter.ReadAsync(file.Path);
+            var plan = LinuxServiceImporter.CreatePlan(_services, imported);
+            if (plan.ServicesToAdd.Count == 0)
+            {
+                StatusInfoBar.Title = AppText.Get("Import_NoChangesTitle");
+                StatusInfoBar.Message = AppText.Format(
+                    "Import_NoChangesMessage",
+                    plan.SkippedDuplicates);
+                StatusInfoBar.Severity = InfoBarSeverity.Informational;
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = AppText.Format("Import_ConfirmTitle", plan.ServicesToAdd.Count),
+                Content = new TextBlock
+                {
+                    Text = AppText.Format(
+                        "Import_ConfirmMessage",
+                        plan.ServicesToAdd.Count,
+                        plan.SkippedDuplicates,
+                        plan.ReassignedIds),
+                    TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+                    MaxWidth = 480
+                },
+                PrimaryButtonText = AppText.Get("Common_Import"),
+                CloseButtonText = AppText.Get("Common_Cancel"),
+                DefaultButton = ContentDialogButton.Close
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            await _serviceStore.SaveAsync(_services.Concat(plan.ServicesToAdd));
+            var importedItems = new List<ServiceRailItem>();
+            foreach (var service in plan.ServicesToAdd)
+            {
+                _services.Add(service);
+                var (_, railItem) = AddServiceHost(service);
+                importedItems.Add(railItem);
+            }
+
+            for (var index = 0; index < importedItems.Count; index++)
+            {
+                if (!plan.ServicesToAdd[index].Disabled)
+                {
+                    await TryInitializeHostAsync(importedItems[index].Host);
+                }
+            }
+
+            if (importedItems.Count > 0)
+            {
+                SelectRailItem(importedItems[0]);
+            }
+
+            StatusInfoBar.Title = AppText.Get("Import_CompletedTitle");
+            StatusInfoBar.Message = AppText.Format(
+                "Import_CompletedMessage",
+                plan.ServicesToAdd.Count,
+                plan.SkippedDuplicates);
+            StatusInfoBar.Severity = InfoBarSeverity.Success;
+        }
+        catch (Exception exception)
+        {
+            StatusInfoBar.Title = AppText.Get("Import_FailedTitle");
+            StatusInfoBar.Message = exception.Message;
+            StatusInfoBar.Severity = InfoBarSeverity.Error;
+        }
+    }
+
     private async void OnSpellcheckClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (XamlRoot is null)

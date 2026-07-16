@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="SpellcheckMenuItem.Text" xml:space="preserve"><value>Correção ortográfica…</value></data>
+  <data name="ImportServicesMenuItem.Text" xml:space="preserve"><value>Importar serviços do Linux…</value></data>
   <data name="DiagnosticsMenuItem.Text" xml:space="preserve"><value>Diagnóstico</value></data>
   <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recuperar serviço</value></data>
   <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Medir memória</value></data>
@@ -29,6 +30,7 @@
   <data name="Common_Add" xml:space="preserve"><value>Adicionar</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
   <data name="Common_Save" xml:space="preserve"><value>Salvar</value></data>
+  <data name="Common_Import" xml:space="preserve"><value>Importar</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Endereço</value></data>
   <data name="About_Content" xml:space="preserve"><value>Versão {0}&#xA;&#xA;Seus serviços web em uma única janela, com sessões isoladas.</value></data>
@@ -175,4 +177,11 @@
   <data name="ProfileStatus_Disabled" xml:space="preserve"><value>desativado</value></data>
   <data name="ProfileStatus_Closed" xml:space="preserve"><value>fechado</value></data>
   <data name="ServiceGroup_DisplayName" xml:space="preserve"><value>{0} · {1} instâncias</value></data>
+  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Importar {0} serviços?</value></data>
+  <data name="Import_ConfirmMessage" xml:space="preserve"><value>{0} serviços serão adicionados, {1} duplicados serão ignorados e {2} identificadores conflitantes serão ajustados.&#xA;&#xA;Cookies e sessões do WebKitGTK não são compatíveis com o WebView2. Você precisará entrar novamente nas contas importadas.</value></data>
+  <data name="Import_NoChangesTitle" xml:space="preserve"><value>Nenhum serviço novo</value></data>
+  <data name="Import_NoChangesMessage" xml:space="preserve"><value>Todos os serviços do arquivo já estão configurados ({0} duplicados ignorados).</value></data>
+  <data name="Import_CompletedTitle" xml:space="preserve"><value>Importação concluída</value></data>
+  <data name="Import_CompletedMessage" xml:space="preserve"><value>{0} serviços foram adicionados e {1} duplicados foram ignorados. Entre novamente nas contas importadas.</value></data>
+  <data name="Import_FailedTitle" xml:space="preserve"><value>Não foi possível importar os serviços</value></data>
 </root>

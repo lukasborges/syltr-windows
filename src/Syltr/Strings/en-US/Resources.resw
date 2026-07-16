@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="SpellcheckMenuItem.Text" xml:space="preserve"><value>Spell checking…</value></data>
+  <data name="ImportServicesMenuItem.Text" xml:space="preserve"><value>Import services from Linux…</value></data>
   <data name="DiagnosticsMenuItem.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recover service</value></data>
   <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Measure memory</value></data>
@@ -29,6 +30,7 @@
   <data name="Common_Add" xml:space="preserve"><value>Add</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Common_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Common_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Address</value></data>
   <data name="About_Content" xml:space="preserve"><value>Version {0}&#xA;&#xA;Your web services in one window, with isolated sessions.</value></data>
@@ -175,4 +177,11 @@
   <data name="ProfileStatus_Disabled" xml:space="preserve"><value>disabled</value></data>
   <data name="ProfileStatus_Closed" xml:space="preserve"><value>closed</value></data>
   <data name="ServiceGroup_DisplayName" xml:space="preserve"><value>{0} · {1} instances</value></data>
+  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Import {0} services?</value></data>
+  <data name="Import_ConfirmMessage" xml:space="preserve"><value>{0} services will be added, {1} duplicates will be skipped, and {2} conflicting identifiers will be adjusted.&#xA;&#xA;WebKitGTK cookies and sessions are not compatible with WebView2. You will need to sign in again to the imported accounts.</value></data>
+  <data name="Import_NoChangesTitle" xml:space="preserve"><value>No new services</value></data>
+  <data name="Import_NoChangesMessage" xml:space="preserve"><value>All services in the file are already configured ({0} duplicates skipped).</value></data>
+  <data name="Import_CompletedTitle" xml:space="preserve"><value>Import completed</value></data>
+  <data name="Import_CompletedMessage" xml:space="preserve"><value>{0} services were added and {1} duplicates were skipped. Sign in again to the imported accounts.</value></data>
+  <data name="Import_FailedTitle" xml:space="preserve"><value>The services could not be imported</value></data>
 </root>

@@ -120,7 +120,13 @@ Domain behavior should be covered by unit tests before it is connected to WinUI.
 - native app notifications through Windows App SDK;
 - logging and diagnostics abstractions.
 
-The initial persistence schema should remain compatible with the original `services.json` when practical. Configuration can be imported, but WebKitGTK cookies and sessions cannot safely be converted into Chromium/WebView2 profiles; imported services will require login again.
+The persistence schema remains compatible with the original `services.json`. Use
+**Import services from Linux…** in the main menu and select a copy of
+`~/.config/dev.syltr.Syltr/services.json`. The import validates the complete
+file, appends new services, skips exact duplicates and reassigns conflicting
+IDs without overwriting the Windows configuration. WebKitGTK cookies and
+sessions cannot be converted into Chromium/WebView2 profiles, so imported
+services require login again.
 
 ### `Engine`
 
@@ -304,7 +310,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Custom user-agent per service.
 - [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
 - [ ] Debug console capture and diagnostics.
-- [ ] Configuration import from the Linux application.
+- [x] Non-destructive configuration import from the Linux application.
 - [x] Portuguese and English resources across the application UI.
 - [ ] Accessibility review and full keyboard navigation.
 
@@ -543,4 +549,4 @@ Service names and logos may be trademarks of their respective owners. Before dis
 3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
 4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
 5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
-6. Implement compatible import of the Linux `services.json` configuration.
+6. Validate the Linux `services.json` import with a real user configuration.
