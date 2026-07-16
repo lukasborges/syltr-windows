@@ -6,15 +6,10 @@ implementation. Schema metadata therefore lives separately in
 `migrations/schema.json`.
 
 Version 1 is the initial Windows schema. An existing configuration without a
-schema marker is treated as version 1, so importing compatible Linux files does
-not require rewriting them.
-
-The interactive Linux import is non-destructive: it validates every service
-before saving, appends services in source order, skips exact duplicates and
-assigns a new ID when an imported ID conflicts with a different Windows
-service. It imports service definitions only. WebKitGTK session directories,
-cookies and storage are never read because they are not compatible with
-WebView2 profiles.
+schema marker is treated as version 1. The product does not expose an
+interactive Linux importer: WebKitGTK session directories, cookies and storage
+are not compatible with WebView2 profiles, and migration tooling does not
+belong in the end-user menu.
 
 Future migrations must follow these rules:
 

@@ -115,18 +115,14 @@ Domain behavior should be covered by unit tests before it is connected to WinUI.
 - JSON service and settings stores;
 - atomic writes and graceful handling of corrupted files;
 - application data paths under Windows local application data;
-- import of compatible configuration from the Linux version;
 - Downloads folder resolution and collision-free file naming;
 - native app notifications through Windows App SDK;
 - logging and diagnostics abstractions.
 
-The persistence schema remains compatible with the original `services.json`. Use
-**Import services from Linux…** in the main menu and select a copy of
-`~/.config/dev.syltr.Syltr/services.json`. The import validates the complete
-file, appends new services, skips exact duplicates and reassigns conflicting
-IDs without overwriting the Windows configuration. WebKitGTK cookies and
-sessions cannot be converted into Chromium/WebView2 profiles, so imported
-services require login again.
+The persistence schema remains compatible with the original `services.json`,
+but the Windows interface does not expose a Linux configuration importer. This
+keeps the main menu aligned with the Linux application and avoids presenting a
+migration tool as an end-user feature.
 
 ### `Engine`
 
@@ -310,7 +306,6 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [x] Custom user-agent per service.
 - [x] Spell-check behavior and language strategy (Windows-managed dictionaries).
 - [x] Opt-in debug console capture and diagnostics.
-- [x] Non-destructive configuration import from the Linux application.
 - [x] Portuguese and English resources across the application UI.
 - [ ] Accessibility review and full keyboard navigation (implementation complete; Narrator/high-contrast runtime pass pending).
 
@@ -488,9 +483,9 @@ below does not.
     the overflow menu, mute or disable it, drag its tab to reorder it, restart
     Syltr and confirm its order and isolated session persist. Re-enable a
     disabled service and confirm the prior session returns.
-15. Set `SYLTR_DEBUG=1`, add enough diagnostic/custom instances to reach 5, 10
-    and 20 loaded services. At each point choose **Measure memory** from the diagnostic submenu and
-    record the WebView2 working set, private memory and process count.
+15. Add enough diagnostic/custom instances to reach 5, 10 and 20 loaded
+    services. At each point record the WebView2 working set, private memory and
+    process count with an external Windows process profiler.
 16. Add a second instance of the same catalog service. Confirm the rail keeps a
     single grouped tile and shows the account/instance selector above the web
     content; its badge should aggregate unread counts from the group.
@@ -555,4 +550,3 @@ Service names and logos may be trademarks of their respective owners. Before dis
 3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
 4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
 5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
-6. Validate the Linux `services.json` import with a real user configuration.

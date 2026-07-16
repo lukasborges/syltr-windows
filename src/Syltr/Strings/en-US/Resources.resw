@@ -5,12 +5,6 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="SpellcheckMenuItem.Text" xml:space="preserve"><value>Spell checking…</value></data>
-  <data name="ImportServicesMenuItem.Text" xml:space="preserve"><value>Import services from Linux…</value></data>
-  <data name="DiagnosticsMenuItem.Text" xml:space="preserve"><value>Diagnostics</value></data>
-  <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recover service</value></data>
-  <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Measure memory</value></data>
-  <data name="TestNotificationMenuItem.Text" xml:space="preserve"><value>Test Windows notification</value></data>
-  <data name="OpenLogsMenuItem.Text" xml:space="preserve"><value>Open diagnostics folder</value></data>
   <data name="AboutMenuItem.Text" xml:space="preserve"><value>About Syltr</value></data>
   <data name="ExitMenuItem.Text" xml:space="preserve"><value>Exit</value></data>
   <data name="Header_MainMenu" xml:space="preserve"><value>Main menu</value></data>
@@ -31,7 +25,6 @@
   <data name="Common_Add" xml:space="preserve"><value>Add</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Common_Save" xml:space="preserve"><value>Save</value></data>
-  <data name="Common_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Address</value></data>
   <data name="About_Content" xml:space="preserve"><value>Version {0}&#xA;&#xA;Your web services in one window, with isolated sessions.</value></data>
@@ -55,6 +48,7 @@
   <data name="EditService_UserAgentPlaceholder" xml:space="preserve"><value>Leave empty to use the WebView2 default</value></data>
   <data name="RemoveService_Title" xml:space="preserve"><value>Remove {0}?</value></data>
   <data name="RemoveService_Description" xml:space="preserve"><value>This service's cookies, session, and storage will be removed. Other services will not be changed.</value></data>
+  <data name="RemoveService_AccountDescription" xml:space="preserve"><value>Only the current account and its session will be removed. Other accounts for this service will not be changed.</value></data>
   <data name="RemoveService_CompletedTitle" xml:space="preserve"><value>Service removed</value></data>
   <data name="RemoveService_CompletedMessage" xml:space="preserve"><value>{0} and its session were removed.</value></data>
   <data name="Context_AddInstance" xml:space="preserve"><value>Add another instance…</value></data>
@@ -66,6 +60,7 @@
   <data name="Context_Disable" xml:space="preserve"><value>Disable service</value></data>
   <data name="Context_Enable" xml:space="preserve"><value>Enable service</value></data>
   <data name="Context_Remove" xml:space="preserve"><value>Remove service</value></data>
+  <data name="Context_RemoveAccount" xml:space="preserve"><value>Remove this account</value></data>
   <data name="Permission_Remember" xml:space="preserve"><value>Remember for this profile</value></data>
   <data name="Permission_RequestDescription" xml:space="preserve"><value>{0} wants to access {1}.</value></data>
   <data name="Permission_Details" xml:space="preserve"><value>Profile: {0}&#xA;Origin: {1}</value></data>
@@ -134,21 +129,8 @@
   <data name="Recovery_CompletedTitle" xml:space="preserve"><value>Profile recovered</value></data>
   <data name="Recovery_CompletedMessage" xml:space="preserve"><value>{0} was recreated using the same persistent session.</value></data>
   <data name="Recovery_FailedTitle" xml:space="preserve"><value>Recovery failed</value></data>
-  <data name="Memory_ProcessGroup" xml:space="preserve"><value>{0}: {1} processes, {2}</value></data>
-  <data name="Memory_Title" xml:space="preserve"><value>WebView2 memory · services: {0}</value></data>
-  <data name="Memory_Content" xml:space="preserve"><value>Working set: {0}&#xA;Private memory: {1}&#xA;Processes: {2}&#xA;&#xA;{3}</value></data>
-  <data name="Memory_FailedTitle" xml:space="preserve"><value>Memory could not be measured</value></data>
-  <data name="WindowsNotification_UnavailableTitle" xml:space="preserve"><value>Windows notifications unavailable</value></data>
-  <data name="WindowsNotification_RegistrationIncomplete" xml:space="preserve"><value>Registration was not completed.</value></data>
-  <data name="WindowsNotification_TestTitle" xml:space="preserve"><value>Syltr test</value></data>
-  <data name="WindowsNotification_TestBody" xml:space="preserve"><value>The native bridge is working for {0}.</value></data>
-  <data name="WindowsNotification_SentTitle" xml:space="preserve"><value>Notification sent to Windows</value></data>
-  <data name="WindowsNotification_SentMessage" xml:space="preserve"><value>Click it to confirm activation of the source profile.</value></data>
-  <data name="WindowsNotification_FailedTitle" xml:space="preserve"><value>Notification could not be sent</value></data>
   <data name="Diagnostics_AuthenticationTitle" xml:space="preserve"><value>Authentication test</value></data>
   <data name="Diagnostics_AuthenticationMessage" xml:space="preserve"><value>Each tab uses a different persistent profile. Sign in with different accounts to validate separation.</value></data>
-  <data name="Diagnostics_OpenLogsFailedTitle" xml:space="preserve"><value>Diagnostics could not be opened</value></data>
-  <data name="Diagnostics_OpenLogsFailedMessage" xml:space="preserve"><value>Windows did not open the diagnostics folder.</value></data>
   <data name="ExternalLink_FailedTitle" xml:space="preserve"><value>The link could not be opened</value></data>
   <data name="Notification_OpenService" xml:space="preserve"><value>Open service</value></data>
   <data name="Notification_FallbackMessage" xml:space="preserve"><value>Notification from {0} · {1}</value></data>
@@ -183,11 +165,4 @@
   <data name="ProfileStatus_Disabled" xml:space="preserve"><value>disabled</value></data>
   <data name="ProfileStatus_Closed" xml:space="preserve"><value>closed</value></data>
   <data name="ServiceGroup_DisplayName" xml:space="preserve"><value>{0} · {1} instances</value></data>
-  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Import {0} services?</value></data>
-  <data name="Import_ConfirmMessage" xml:space="preserve"><value>{0} services will be added, {1} duplicates will be skipped, and {2} conflicting identifiers will be adjusted.&#xA;&#xA;WebKitGTK cookies and sessions are not compatible with WebView2. You will need to sign in again to the imported accounts.</value></data>
-  <data name="Import_NoChangesTitle" xml:space="preserve"><value>No new services</value></data>
-  <data name="Import_NoChangesMessage" xml:space="preserve"><value>All services in the file are already configured ({0} duplicates skipped).</value></data>
-  <data name="Import_CompletedTitle" xml:space="preserve"><value>Import completed</value></data>
-  <data name="Import_CompletedMessage" xml:space="preserve"><value>{0} services were added and {1} duplicates were skipped. Sign in again to the imported accounts.</value></data>
-  <data name="Import_FailedTitle" xml:space="preserve"><value>The services could not be imported</value></data>
 </root>

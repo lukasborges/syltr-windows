@@ -17,6 +17,6 @@ KiB, and the log rotates to one backup after reaching 2 MiB.
 
 Console text is controlled by hosted websites and can contain account or
 application data. Capture is therefore disabled by default, local only, and
-never sent as telemetry. The diagnostics menu can open the local log folder.
-Writing or enabling capture is best-effort and must never prevent a service from
-loading.
+never sent as telemetry. It does not add engineering commands to the end-user
+menu. Writing or enabling capture is best-effort and must never prevent a
+service from loading.

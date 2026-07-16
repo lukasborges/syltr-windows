@@ -5,12 +5,6 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="SpellcheckMenuItem.Text" xml:space="preserve"><value>Correção ortográfica…</value></data>
-  <data name="ImportServicesMenuItem.Text" xml:space="preserve"><value>Importar serviços do Linux…</value></data>
-  <data name="DiagnosticsMenuItem.Text" xml:space="preserve"><value>Diagnóstico</value></data>
-  <data name="RecoverMenuItem.Text" xml:space="preserve"><value>Recuperar serviço</value></data>
-  <data name="MeasureMemoryMenuItem.Text" xml:space="preserve"><value>Medir memória</value></data>
-  <data name="TestNotificationMenuItem.Text" xml:space="preserve"><value>Testar notificação do Windows</value></data>
-  <data name="OpenLogsMenuItem.Text" xml:space="preserve"><value>Abrir pasta de diagnósticos</value></data>
   <data name="AboutMenuItem.Text" xml:space="preserve"><value>Sobre o Syltr</value></data>
   <data name="ExitMenuItem.Text" xml:space="preserve"><value>Sair</value></data>
   <data name="Header_MainMenu" xml:space="preserve"><value>Menu principal</value></data>
@@ -31,7 +25,6 @@
   <data name="Common_Add" xml:space="preserve"><value>Adicionar</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
   <data name="Common_Save" xml:space="preserve"><value>Salvar</value></data>
-  <data name="Common_Import" xml:space="preserve"><value>Importar</value></data>
   <data name="Field_Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Field_Address" xml:space="preserve"><value>Endereço</value></data>
   <data name="About_Content" xml:space="preserve"><value>Versão {0}&#xA;&#xA;Seus serviços web em uma única janela, com sessões isoladas.</value></data>
@@ -55,6 +48,7 @@
   <data name="EditService_UserAgentPlaceholder" xml:space="preserve"><value>Deixe vazio para usar o padrão do WebView2</value></data>
   <data name="RemoveService_Title" xml:space="preserve"><value>Remover {0}?</value></data>
   <data name="RemoveService_Description" xml:space="preserve"><value>Cookies, sessão e armazenamento deste serviço serão removidos. Os demais serviços não serão alterados.</value></data>
+  <data name="RemoveService_AccountDescription" xml:space="preserve"><value>Somente a conta atual e sua sessão serão removidas. As outras contas deste serviço não serão alteradas.</value></data>
   <data name="RemoveService_CompletedTitle" xml:space="preserve"><value>Serviço removido</value></data>
   <data name="RemoveService_CompletedMessage" xml:space="preserve"><value>{0} e sua sessão foram removidos.</value></data>
   <data name="Context_AddInstance" xml:space="preserve"><value>Adicionar outra instância…</value></data>
@@ -66,6 +60,7 @@
   <data name="Context_Disable" xml:space="preserve"><value>Desativar serviço</value></data>
   <data name="Context_Enable" xml:space="preserve"><value>Ativar serviço</value></data>
   <data name="Context_Remove" xml:space="preserve"><value>Remover serviço</value></data>
+  <data name="Context_RemoveAccount" xml:space="preserve"><value>Remover esta conta</value></data>
   <data name="Permission_Remember" xml:space="preserve"><value>Lembrar para este perfil</value></data>
   <data name="Permission_RequestDescription" xml:space="preserve"><value>{0} quer acessar {1}.</value></data>
   <data name="Permission_Details" xml:space="preserve"><value>Perfil: {0}&#xA;Origem: {1}</value></data>
@@ -134,21 +129,8 @@
   <data name="Recovery_CompletedTitle" xml:space="preserve"><value>Perfil recuperado</value></data>
   <data name="Recovery_CompletedMessage" xml:space="preserve"><value>{0} foi recriado usando a mesma sessão persistente.</value></data>
   <data name="Recovery_FailedTitle" xml:space="preserve"><value>Falha na recuperação</value></data>
-  <data name="Memory_ProcessGroup" xml:space="preserve"><value>{0}: {1} processos, {2}</value></data>
-  <data name="Memory_Title" xml:space="preserve"><value>Memória WebView2 · serviços: {0}</value></data>
-  <data name="Memory_Content" xml:space="preserve"><value>Working set: {0}&#xA;Memória privada: {1}&#xA;Processos: {2}&#xA;&#xA;{3}</value></data>
-  <data name="Memory_FailedTitle" xml:space="preserve"><value>Não foi possível medir a memória</value></data>
-  <data name="WindowsNotification_UnavailableTitle" xml:space="preserve"><value>Notificações do Windows indisponíveis</value></data>
-  <data name="WindowsNotification_RegistrationIncomplete" xml:space="preserve"><value>O registro não foi concluído.</value></data>
-  <data name="WindowsNotification_TestTitle" xml:space="preserve"><value>Teste do Syltr</value></data>
-  <data name="WindowsNotification_TestBody" xml:space="preserve"><value>A ponte nativa está funcionando para {0}.</value></data>
-  <data name="WindowsNotification_SentTitle" xml:space="preserve"><value>Notificação enviada ao Windows</value></data>
-  <data name="WindowsNotification_SentMessage" xml:space="preserve"><value>Clique nela para confirmar a ativação do perfil de origem.</value></data>
-  <data name="WindowsNotification_FailedTitle" xml:space="preserve"><value>Falha ao enviar notificação</value></data>
   <data name="Diagnostics_AuthenticationTitle" xml:space="preserve"><value>Teste de autenticação</value></data>
   <data name="Diagnostics_AuthenticationMessage" xml:space="preserve"><value>Cada aba usa um perfil persistente diferente. Faça login com contas distintas para validar a separação.</value></data>
-  <data name="Diagnostics_OpenLogsFailedTitle" xml:space="preserve"><value>Não foi possível abrir os diagnósticos</value></data>
-  <data name="Diagnostics_OpenLogsFailedMessage" xml:space="preserve"><value>O Windows não abriu a pasta de diagnósticos.</value></data>
   <data name="ExternalLink_FailedTitle" xml:space="preserve"><value>Não foi possível abrir o link</value></data>
   <data name="Notification_OpenService" xml:space="preserve"><value>Abrir serviço</value></data>
   <data name="Notification_FallbackMessage" xml:space="preserve"><value>Notificação de {0} · {1}</value></data>
@@ -183,11 +165,4 @@
   <data name="ProfileStatus_Disabled" xml:space="preserve"><value>desativado</value></data>
   <data name="ProfileStatus_Closed" xml:space="preserve"><value>fechado</value></data>
   <data name="ServiceGroup_DisplayName" xml:space="preserve"><value>{0} · {1} instâncias</value></data>
-  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Importar {0} serviços?</value></data>
-  <data name="Import_ConfirmMessage" xml:space="preserve"><value>{0} serviços serão adicionados, {1} duplicados serão ignorados e {2} identificadores conflitantes serão ajustados.&#xA;&#xA;Cookies e sessões do WebKitGTK não são compatíveis com o WebView2. Você precisará entrar novamente nas contas importadas.</value></data>
-  <data name="Import_NoChangesTitle" xml:space="preserve"><value>Nenhum serviço novo</value></data>
-  <data name="Import_NoChangesMessage" xml:space="preserve"><value>Todos os serviços do arquivo já estão configurados ({0} duplicados ignorados).</value></data>
-  <data name="Import_CompletedTitle" xml:space="preserve"><value>Importação concluída</value></data>
-  <data name="Import_CompletedMessage" xml:space="preserve"><value>{0} serviços foram adicionados e {1} duplicados foram ignorados. Entre novamente nas contas importadas.</value></data>
-  <data name="Import_FailedTitle" xml:space="preserve"><value>Não foi possível importar os serviços</value></data>
 </root>

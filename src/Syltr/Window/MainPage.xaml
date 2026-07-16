@@ -9,16 +9,49 @@
     Unloaded="OnUnloaded"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="RailBackgroundBrush" Color="#202225" />
-        <SolidColorBrush x:Key="RailHoverBrush" Color="#2B2E33" />
-        <SolidColorBrush x:Key="RailSelectedBrush" Color="#33363C" />
-        <SolidColorBrush x:Key="RailIconBackgroundBrush" Color="#3A3D43" />
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary x:Key="Default">
+                <SolidColorBrush x:Key="RailBackgroundBrush" Color="#202225" />
+                <SolidColorBrush x:Key="RailHoverBrush" Color="#2B2E33" />
+                <SolidColorBrush x:Key="RailSelectedBrush" Color="#33363C" />
+                <SolidColorBrush x:Key="RailIconBackgroundBrush" Color="#3A3D43" />
+                <SolidColorBrush x:Key="RailStackBackgroundBrush" Color="#555960" />
+                <SolidColorBrush x:Key="RailIconForegroundBrush" Color="White" />
+                <SolidColorBrush x:Key="UnreadBackgroundBrush" Color="#E01B24" />
+                <SolidColorBrush x:Key="UnreadForegroundBrush" Color="White" />
+                <SolidColorBrush x:Key="HeaderActiveForegroundBrush" Color="#E01B24" />
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Light">
+                <SolidColorBrush x:Key="RailBackgroundBrush" Color="#202225" />
+                <SolidColorBrush x:Key="RailHoverBrush" Color="#2B2E33" />
+                <SolidColorBrush x:Key="RailSelectedBrush" Color="#33363C" />
+                <SolidColorBrush x:Key="RailIconBackgroundBrush" Color="#3A3D43" />
+                <SolidColorBrush x:Key="RailStackBackgroundBrush" Color="#555960" />
+                <SolidColorBrush x:Key="RailIconForegroundBrush" Color="White" />
+                <SolidColorBrush x:Key="UnreadBackgroundBrush" Color="#E01B24" />
+                <SolidColorBrush x:Key="UnreadForegroundBrush" Color="White" />
+                <SolidColorBrush x:Key="HeaderActiveForegroundBrush" Color="#E01B24" />
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="HighContrast">
+                <StaticResource x:Key="RailBackgroundBrush" ResourceKey="SystemColorWindowColorBrush" />
+                <StaticResource x:Key="RailHoverBrush" ResourceKey="SystemColorHighlightColorBrush" />
+                <StaticResource x:Key="RailSelectedBrush" ResourceKey="SystemColorHighlightColorBrush" />
+                <StaticResource x:Key="RailIconBackgroundBrush" ResourceKey="SystemColorButtonFaceColorBrush" />
+                <StaticResource x:Key="RailStackBackgroundBrush" ResourceKey="SystemColorWindowColorBrush" />
+                <StaticResource x:Key="RailIconForegroundBrush" ResourceKey="SystemColorButtonTextColorBrush" />
+                <StaticResource x:Key="UnreadBackgroundBrush" ResourceKey="SystemColorHighlightColorBrush" />
+                <StaticResource x:Key="UnreadForegroundBrush" ResourceKey="SystemColorHighlightTextColorBrush" />
+                <StaticResource x:Key="HeaderActiveForegroundBrush" ResourceKey="SystemColorWindowTextColorBrush" />
+            </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
-        <Style x:Key="HeaderIconButtonStyle" TargetType="Button">
+            <Style x:Key="HeaderIconButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="36" />
             <Setter Property="Height" Value="36" />
             <Setter Property="Margin" Value="2,0" />
             <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="CornerRadius" Value="7" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -56,13 +89,14 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
+            </Style>
 
-        <Style x:Key="HeaderToggleButtonStyle" TargetType="ToggleButton">
+            <Style x:Key="HeaderToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="Width" Value="36" />
             <Setter Property="Height" Value="36" />
             <Setter Property="Margin" Value="2,0" />
             <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="CornerRadius" Value="7" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -93,7 +127,7 @@
                                     <VisualState x:Name="Unchecked" />
                                     <VisualState x:Name="Checked">
                                         <VisualState.Setters>
-                                            <Setter Target="HeaderToggleContent.Foreground" Value="#E01B24" />
+                                            <Setter Target="HeaderToggleContent.Foreground" Value="{ThemeResource HeaderActiveForegroundBrush}" />
                                         </VisualState.Setters>
                                     </VisualState>
                                 </VisualStateGroup>
@@ -109,9 +143,9 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
+            </Style>
 
-        <Style x:Key="ServiceRailItemStyle" TargetType="ListViewItem">
+            <Style x:Key="ServiceRailItemStyle" TargetType="ListViewItem">
             <Setter Property="Width" Value="84" />
             <Setter Property="Height" Value="52" />
             <Setter Property="Padding" Value="0" />
@@ -127,29 +161,29 @@
                                     <VisualState x:Name="Normal" />
                                     <VisualState x:Name="PointerOver">
                                         <VisualState.Setters>
-                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailHoverBrush}" />
+                                            <Setter Target="RailItemRoot.Background" Value="{ThemeResource RailHoverBrush}" />
                                         </VisualState.Setters>
                                     </VisualState>
                                     <VisualState x:Name="Pressed">
                                         <VisualState.Setters>
-                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="RailItemRoot.Background" Value="{ThemeResource RailSelectedBrush}" />
                                         </VisualState.Setters>
                                     </VisualState>
                                     <VisualState x:Name="Selected">
                                         <VisualState.Setters>
-                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="RailItemRoot.Background" Value="{ThemeResource RailSelectedBrush}" />
                                             <Setter Target="SelectionStrip.Visibility" Value="Visible" />
                                         </VisualState.Setters>
                                     </VisualState>
                                     <VisualState x:Name="SelectedPointerOver">
                                         <VisualState.Setters>
-                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="RailItemRoot.Background" Value="{ThemeResource RailSelectedBrush}" />
                                             <Setter Target="SelectionStrip.Visibility" Value="Visible" />
                                         </VisualState.Setters>
                                     </VisualState>
                                     <VisualState x:Name="SelectedPressed">
                                         <VisualState.Setters>
-                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="RailItemRoot.Background" Value="{ThemeResource RailSelectedBrush}" />
                                             <Setter Target="SelectionStrip.Visibility" Value="Visible" />
                                         </VisualState.Setters>
                                     </VisualState>
@@ -171,7 +205,8 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
+            </Style>
+        </ResourceDictionary>
     </Page.Resources>
 
     <Page.KeyboardAccelerators>
@@ -228,14 +263,7 @@
                     <Button.Content><SymbolIcon Symbol="GlobalNavigationButton" /></Button.Content>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                            <MenuFlyoutItem x:Uid="ImportServicesMenuItem" Click="OnImportServicesClick" />
                             <MenuFlyoutItem x:Uid="SpellcheckMenuItem" Click="OnSpellcheckClick" />
-                            <MenuFlyoutSubItem x:Uid="DiagnosticsMenuItem" x:Name="DiagnosticsMenuItem" Visibility="Collapsed">
-                                <MenuFlyoutItem x:Uid="RecoverMenuItem" Click="OnRecoverClick" />
-                                <MenuFlyoutItem x:Uid="MeasureMemoryMenuItem" Click="OnMeasureMemoryClick" />
-                                <MenuFlyoutItem x:Uid="TestNotificationMenuItem" Click="OnTestWindowsNotificationClick" />
-                                <MenuFlyoutItem x:Uid="OpenLogsMenuItem" Click="OnOpenDiagnosticsFolderClick" />
-                            </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem x:Uid="AboutMenuItem" Click="OnAboutClick" />
                             <MenuFlyoutItem x:Uid="ExitMenuItem" Click="OnExitClick" />
@@ -307,7 +335,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Ferdium-inspired, icon-only service rail. -->
-            <Grid Background="{StaticResource RailBackgroundBrush}">
+            <Grid Background="{ThemeResource RailBackgroundBrush}">
                 <ListView
                     x:Name="ServiceRail"
                     AllowDrop="True"
@@ -319,6 +347,7 @@
                     ItemClick="OnRailItemClick"
                     ItemContainerStyle="{StaticResource ServiceRailItemStyle}"
                     RightTapped="OnServiceRailRightTapped"
+                    ReorderMode="Enabled"
                     SelectionChanged="OnProfileSelectionChanged"
                     SelectionMode="Single">
                     <ListView.KeyboardAccelerators>
@@ -337,7 +366,7 @@
                                     Height="40"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Background="#555960"
+                                    Background="{ThemeResource RailStackBackgroundBrush}"
                                     CornerRadius="11"
                                     Visibility="{Binding StackVisibility}">
                                     <Border.RenderTransform>
@@ -357,7 +386,7 @@
                                             VerticalAlignment="Center"
                                             FontSize="15"
                                             FontWeight="SemiBold"
-                                            Foreground="White"
+                                            Foreground="{ThemeResource RailIconForegroundBrush}"
                                             Text="{Binding ActiveItem.Tile.Initial}"
                                             Visibility="{Binding ActiveItem.Tile.InitialVisibility}" />
                                         <Image
@@ -374,7 +403,7 @@
                                     Padding="4,0"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
-                                    Background="#E01B24"
+                                    Background="{ThemeResource UnreadBackgroundBrush}"
                                     CornerRadius="9"
                                     Visibility="{Binding UnreadVisibility}">
                                     <TextBlock
@@ -382,7 +411,7 @@
                                         VerticalAlignment="Center"
                                         FontSize="10"
                                         FontWeight="SemiBold"
-                                        Foreground="White"
+                                        Foreground="{ThemeResource UnreadForegroundBrush}"
                                         Text="{Binding UnreadText}" />
                                 </Border>
                             </Grid>
@@ -431,7 +460,7 @@
                 <!-- Native feedback appears as a compact in-app toast, not as permanent chrome. -->
                 <InfoBar
                     x:Name="StatusInfoBar"
-                    Width="520"
+                    MaxWidth="520"
                     Margin="16"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"

@@ -34,17 +34,13 @@ Windows. A auditoria detalhada de paridade continua em
 - Permissões, downloads, favicons, contagem de não lidos, notificações web e
   notificações nativas do Windows.
 - Correção ortográfica gerenciada pelos idiomas e dicionários do Windows, com
-  diagnóstico no menu e atalho para as Configurações de idioma do sistema.
+  atalho para as Configurações de idioma do sistema.
 - Interface localizada em `pt-BR` e `en-US`, incluindo menu, header, catálogo,
   diálogos, permissões, estados, notificações, downloads e diagnósticos.
 - Configuração JSON atômica com esquema/migração, preferências, ordem dos
   serviços, mute, desativação e user-agent opcional.
-- Importação não destrutiva do `services.json` Linux pelo menu principal, com
-  validação integral, deduplicação, resolução de IDs conflitantes e aviso de
-  novo login para os perfis WebView2.
 - Captura opt-in do console WebView2 via `SYLTR_DEBUG=1`, em JSONL local com
-  origem sanitizada, limite por mensagem, rotação e acesso pelo menu de
-  diagnóstico.
+  origem sanitizada, limite por mensagem e rotação.
 - Base de acessibilidade com nomes localizados, títulos semânticos, status como
   região viva, foco inicial e `Esc` no catálogo e menu contextual do rail por
   `Shift+F10`.
@@ -79,5 +75,6 @@ dotnet test tests\Syltr.Tests\Syltr.Tests.csproj --no-restore
 .\scripts\run-isolation-spike.ps1
 ```
 
-Para exibir os comandos de engenharia no menu principal durante uma sessão de
-diagnóstico, inicie o aplicativo com `SYLTR_DEBUG=1`.
+Para habilitar a captura local do console WebView2 durante uma sessão de
+diagnóstico, inicie o aplicativo com `SYLTR_DEBUG=1`. Essa opção não adiciona
+comandos de engenharia ao menu do usuário.

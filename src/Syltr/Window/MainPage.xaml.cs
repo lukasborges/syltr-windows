@@ -85,9 +85,6 @@ public sealed partial class MainPage : Page
         _isPageLoaded = true;
         ((App)Microsoft.UI.Xaml.Application.Current).SetMainWindowDragRegion(TitleDragRegion);
         _diagnosticsEnabled = Environment.GetEnvironmentVariable("SYLTR_DEBUG") == "1";
-        DiagnosticsMenuItem.Visibility = _diagnosticsEnabled
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
         _windowsNotifications = ((App)Microsoft.UI.Xaml.Application.Current).Notifications;
         _windowsNotifications.Activated += OnWindowsNotificationActivated;
         if (_initialized)
@@ -389,7 +386,10 @@ public sealed partial class MainPage : Page
             Text = AppText.Get(service.Disabled ? "Context_Enable" : "Context_Disable")
         };
         disable.Click += async (_, _) => await SetSelectedServiceDisabledAsync(!service.Disabled);
-        var remove = new MenuFlyoutItem { Text = AppText.Get("Context_Remove") };
+        var remove = new MenuFlyoutItem
+        {
+            Text = AppText.Get(group.Items.Count > 1 ? "Context_RemoveAccount" : "Context_Remove")
+        };
         remove.Click += async (_, _) => await DeleteSelectedProfileAsync();
 
         menu.Items.Add(reload);
@@ -561,109 +561,6 @@ public sealed partial class MainPage : Page
     private void OnExitClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
         ((App)Microsoft.UI.Xaml.Application.Current).CloseMainWindow();
 
-    private async void OnImportServicesClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        if (_serviceStore is null || XamlRoot is null)
-        {
-            return;
-        }
-
-        var owner = ((App)Microsoft.UI.Xaml.Application.Current).MainWindowInstance;
-        if (owner is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var picker = new Windows.Storage.Pickers.FileOpenPicker
-            {
-                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary,
-                ViewMode = Windows.Storage.Pickers.PickerViewMode.List
-            };
-            picker.FileTypeFilter.Add(".json");
-            WinRT.Interop.InitializeWithWindow.Initialize(
-                picker,
-                WinRT.Interop.WindowNative.GetWindowHandle(owner));
-
-            var file = await picker.PickSingleFileAsync();
-            if (file is null)
-            {
-                return;
-            }
-
-            var imported = await LinuxServiceImporter.ReadAsync(file.Path);
-            var plan = LinuxServiceImporter.CreatePlan(_services, imported);
-            if (plan.ServicesToAdd.Count == 0)
-            {
-                StatusInfoBar.Title = AppText.Get("Import_NoChangesTitle");
-                StatusInfoBar.Message = AppText.Format(
-                    "Import_NoChangesMessage",
-                    plan.SkippedDuplicates);
-                StatusInfoBar.Severity = InfoBarSeverity.Informational;
-                return;
-            }
-
-            var dialog = new ContentDialog
-            {
-                XamlRoot = XamlRoot,
-                Title = AppText.Format("Import_ConfirmTitle", plan.ServicesToAdd.Count),
-                Content = new TextBlock
-                {
-                    Text = AppText.Format(
-                        "Import_ConfirmMessage",
-                        plan.ServicesToAdd.Count,
-                        plan.SkippedDuplicates,
-                        plan.ReassignedIds),
-                    TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
-                    MaxWidth = 480
-                },
-                PrimaryButtonText = AppText.Get("Common_Import"),
-                CloseButtonText = AppText.Get("Common_Cancel"),
-                DefaultButton = ContentDialogButton.Close
-            };
-            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
-            {
-                return;
-            }
-
-            await _serviceStore.SaveAsync(_services.Concat(plan.ServicesToAdd));
-            var importedItems = new List<ServiceRailItem>();
-            foreach (var service in plan.ServicesToAdd)
-            {
-                _services.Add(service);
-                var (_, railItem) = AddServiceHost(service);
-                importedItems.Add(railItem);
-            }
-
-            for (var index = 0; index < importedItems.Count; index++)
-            {
-                if (!plan.ServicesToAdd[index].Disabled)
-                {
-                    await TryInitializeHostAsync(importedItems[index].Host);
-                }
-            }
-
-            if (importedItems.Count > 0)
-            {
-                SelectRailItem(importedItems[0]);
-            }
-
-            StatusInfoBar.Title = AppText.Get("Import_CompletedTitle");
-            StatusInfoBar.Message = AppText.Format(
-                "Import_CompletedMessage",
-                plan.ServicesToAdd.Count,
-                plan.SkippedDuplicates);
-            StatusInfoBar.Severity = InfoBarSeverity.Success;
-        }
-        catch (Exception exception)
-        {
-            StatusInfoBar.Title = AppText.Get("Import_FailedTitle");
-            StatusInfoBar.Message = exception.Message;
-            StatusInfoBar.Severity = InfoBarSeverity.Error;
-        }
-    }
-
     private async void OnSpellcheckClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (XamlRoot is null)
@@ -745,7 +642,7 @@ public sealed partial class MainPage : Page
             PlaceholderText = AppText.Get("CustomService_NamePlaceholder")
         };
         var urlBox = new TextBox { Header = AppText.Get("Field_Address"), PlaceholderText = "https://..." };
-        var content = new StackPanel { Spacing = 12, MinWidth = 400 };
+        var content = new StackPanel { Spacing = 12, MaxWidth = 480 };
         content.Children.Add(new TextBlock
         {
             Text = AppText.Get("CustomService_Description"),
@@ -860,7 +757,7 @@ public sealed partial class MainPage : Page
             Text = service.UserAgent ?? string.Empty,
             PlaceholderText = AppText.Get("EditService_UserAgentPlaceholder")
         };
-        var content = new StackPanel { Spacing = 12, MinWidth = 420 };
+        var content = new StackPanel { Spacing = 12, MaxWidth = 480 };
         content.Children.Add(nameBox);
         content.Children.Add(urlBox);
         content.Children.Add(userAgentBox);
@@ -924,9 +821,6 @@ public sealed partial class MainPage : Page
             : AppText.Format("Service_UpdatedSessionPreservedMessage", updated.Name);
         StatusInfoBar.Severity = InfoBarSeverity.Success;
     }
-
-    private async void OnRecoverClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
-        await RecoverSelectedHostAsync();
 
     private async Task RecoverSelectedHostAsync()
     {
@@ -1057,98 +951,6 @@ public sealed partial class MainPage : Page
         ServiceRail.SelectedIndex = (currentIndex + offset + _railGroups.Count) % _railGroups.Count;
     }
 
-    private async void OnMeasureMemoryClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        if (_environment is null || XamlRoot is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var snapshot = await _environment.CaptureMemorySnapshotAsync();
-            var processGroups = snapshot.Processes
-                .GroupBy(process => process.Kind)
-                .OrderBy(group => group.Key)
-                .Select(group => AppText.Format(
-                    "Memory_ProcessGroup",
-                    group.Key,
-                    group.Count(),
-                    FormatBytes(group.Sum(process => process.WorkingSetBytes))));
-            var details = string.Join(Environment.NewLine, processGroups);
-            var dialog = new ContentDialog
-            {
-                XamlRoot = XamlRoot,
-                Title = AppText.Format("Memory_Title", _hosts.Count),
-                Content = AppText.Format(
-                    "Memory_Content",
-                    FormatBytes(snapshot.TotalWorkingSetBytes),
-                    FormatBytes(snapshot.TotalPrivateMemoryBytes),
-                    snapshot.Processes.Count,
-                    details),
-                CloseButtonText = AppText.Get("Common_Close"),
-                DefaultButton = ContentDialogButton.Close
-            };
-            await dialog.ShowAsync();
-        }
-        catch (Exception exception)
-        {
-            StatusInfoBar.Title = AppText.Get("Memory_FailedTitle");
-            StatusInfoBar.Message = exception.Message;
-            StatusInfoBar.Severity = InfoBarSeverity.Error;
-        }
-    }
-
-    private async void OnOpenDiagnosticsFolderClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        try
-        {
-            var paths = ApplicationDataPaths.ForCurrentUser();
-            Directory.CreateDirectory(paths.LogsDirectory);
-            var folder = await Windows.Storage.StorageFolder.GetFolderFromPathAsync(paths.LogsDirectory);
-            if (!await Windows.System.Launcher.LaunchFolderAsync(folder))
-            {
-                throw new InvalidOperationException(AppText.Get("Diagnostics_OpenLogsFailedMessage"));
-            }
-        }
-        catch (Exception exception)
-        {
-            StatusInfoBar.Title = AppText.Get("Diagnostics_OpenLogsFailedTitle");
-            StatusInfoBar.Message = exception.Message;
-            StatusInfoBar.Severity = InfoBarSeverity.Error;
-        }
-    }
-
-    private void OnTestWindowsNotificationClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        if (_windowsNotifications is not { IsRegistered: true })
-        {
-            StatusInfoBar.Title = AppText.Get("WindowsNotification_UnavailableTitle");
-            StatusInfoBar.Message = _windowsNotifications?.RegistrationError
-                ?? AppText.Get("WindowsNotification_RegistrationIncomplete");
-            StatusInfoBar.Severity = InfoBarSeverity.Error;
-            return;
-        }
-
-        try
-        {
-            var profileName = SelectedHost()?.ProfileName ?? "syltr";
-            _windowsNotifications.Show(
-                profileName,
-                AppText.Get("WindowsNotification_TestTitle"),
-                AppText.Format("WindowsNotification_TestBody", profileName));
-            StatusInfoBar.Title = AppText.Get("WindowsNotification_SentTitle");
-            StatusInfoBar.Message = AppText.Get("WindowsNotification_SentMessage");
-            StatusInfoBar.Severity = InfoBarSeverity.Success;
-        }
-        catch (Exception exception)
-        {
-            StatusInfoBar.Title = AppText.Get("WindowsNotification_FailedTitle");
-            StatusInfoBar.Message = exception.Message;
-            StatusInfoBar.Severity = InfoBarSeverity.Error;
-        }
-    }
-
     private void OnNavigateAllClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         var target = (TargetSelector.SelectedItem as ComboBoxItem)?.Tag as string;
@@ -1172,9 +974,6 @@ public sealed partial class MainPage : Page
         StatusInfoBar.Severity = InfoBarSeverity.Informational;
     }
 
-    private async void OnDeleteProfileClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
-        await DeleteSelectedProfileAsync();
-
     private async Task DeleteSelectedProfileAsync()
     {
         var railItem = SelectedRailItem();
@@ -1184,12 +983,17 @@ public sealed partial class MainPage : Page
             return;
         }
 
+        var group = _railGroups.First(candidate => candidate.Items.Contains(railItem));
+        var removingAccountFromGroup = group.Items.Count > 1;
+        var removeActionKey = removingAccountFromGroup ? "Context_RemoveAccount" : "Context_Remove";
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
             Title = AppText.Format("RemoveService_Title", railItem.Tile.Name),
-            Content = AppText.Get("RemoveService_Description"),
-            PrimaryButtonText = AppText.Get("Context_Remove"),
+            Content = AppText.Get(removingAccountFromGroup
+                ? "RemoveService_AccountDescription"
+                : "RemoveService_Description"),
+            PrimaryButtonText = AppText.Get(removeActionKey),
             CloseButtonText = AppText.Get("Common_Cancel"),
             DefaultButton = ContentDialogButton.Close
         };
@@ -1198,6 +1002,16 @@ public sealed partial class MainPage : Page
             return;
         }
 
+        var remainingServices = _services
+            .Where(service => WebViewProfileName.FromServiceId(service.Id) != host.ProfileName)
+            .ToArray();
+        if (_serviceStore is not null)
+        {
+            await _serviceStore.SaveAsync(remainingServices);
+        }
+
+        _services.Clear();
+        _services.AddRange(remainingServices);
         host.StateChanged -= OnHostStateChanged;
         host.PopupRequested -= OnPopupRequested;
         host.PermissionRequested -= OnPermissionRequested;
@@ -1207,24 +1021,29 @@ public sealed partial class MainPage : Page
         host.FaviconChanged -= OnFaviconChanged;
         host.ExternalNavigationRequested -= OnExternalNavigationRequested;
         host.ConsoleMessageReceived -= OnConsoleMessageReceived;
-        if (host.State.Status == ServiceViewStatus.Disabled && !host.IsInitialized)
-        {
-            railItem.Content = host.Content;
-            ServiceContentPresenter.Content = host.Content;
-            await host.ResumeAsync(navigateHome: false);
-        }
-
-        host.DeleteProfile();
         _hosts.Remove(host);
         _states.Remove(host.ProfileName);
-        _services.RemoveAll(service =>
-            WebViewProfileName.FromServiceId(service.Id) == host.ProfileName);
-        if (_serviceStore is not null)
+        RemoveRailItem(railItem);
+        try
         {
-            await _serviceStore.SaveAsync(_services);
+            host.DeleteProfile();
+        }
+        catch
+        {
+            host.Dispose();
         }
 
+        StatusInfoBar.Title = AppText.Get("RemoveService_CompletedTitle");
+        StatusInfoBar.Message = AppText.Format("RemoveService_CompletedMessage", railItem.Tile.Name);
+        StatusInfoBar.Severity = InfoBarSeverity.Warning;
+        UpdateSelectedProfileStatus();
+    }
+
+    private void RemoveRailItem(ServiceRailItem railItem)
+    {
         var group = _railGroups.First(group => group.Items.Contains(railItem));
+        var removedGroupIndex = _railGroups.IndexOf(group);
+        var groupWasSelected = ReferenceEquals(ServiceRail.SelectedItem, group);
         group.Items.Remove(railItem);
         _railItems.Remove(railItem);
         if (group.Items.Count == 0)
@@ -1242,18 +1061,15 @@ public sealed partial class MainPage : Page
             group.RefreshUnread();
         }
 
-        if (ServiceRail.SelectedItem is null && _railGroups.Count > 0)
+        if (groupWasSelected && group.Items.Count == 0)
         {
-            ServiceRail.SelectedIndex = 0;
+            ServiceRail.SelectedIndex = _railGroups.Count == 0
+                ? -1
+                : Math.Min(removedGroupIndex, _railGroups.Count - 1);
         }
 
         SelectRailContent();
         UpdateServiceOverlay();
-
-        StatusInfoBar.Title = AppText.Get("RemoveService_CompletedTitle");
-        StatusInfoBar.Message = AppText.Format("RemoveService_CompletedMessage", railItem.Tile.Name);
-        StatusInfoBar.Severity = InfoBarSeverity.Warning;
-        UpdateSelectedProfileStatus();
     }
 
     private void OnPopupRequested(object? sender, ServicePopupRequestedEventArgs e)

@@ -15,7 +15,7 @@ complete.
    `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Alt+Left/Right`, `Ctrl+R` and `Ctrl+N`.
 4. Open the service catalog. Focus must start in search, every visible result
    must be reachable, and `Esc` must close the window and restore the owner.
-5. Complete and cancel add, edit, remove, permission and import dialogs without
+5. Complete and cancel add, edit, remove and permission dialogs without
    a pointer.
 
 ## Narrator

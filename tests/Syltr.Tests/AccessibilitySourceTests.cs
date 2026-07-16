@@ -15,6 +15,16 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("Key=\"F10\" Modifiers=\"Shift\"", xaml);
         Assert.Contains("AutomationProperties.SetHelpText(ServiceRail", code);
         Assert.Contains("AutomationProperties.SetName(InstanceSelector", code);
+        Assert.Contains("ResourceDictionary x:Key=\"HighContrast\"", xaml);
+        Assert.Contains("SystemColorHighlightColorBrush", xaml);
+        Assert.Contains("Setter Property=\"FontSize\" Value=\"16\"", xaml);
+        Assert.Contains("MaxWidth=\"520\"", xaml);
+        Assert.Contains("ReorderMode=\"Enabled\"", xaml);
+        Assert.Contains("CanReorderItems=\"True\"", xaml);
+        Assert.Contains("AllowDrop=\"True\"", xaml);
+        Assert.DoesNotContain("ImportServicesMenuItem", xaml);
+        Assert.DoesNotContain("DiagnosticsMenuItem", xaml);
+        Assert.Contains("RemoveRailItem(railItem)", code);
     }
 
     [Fact]
