@@ -12,7 +12,7 @@ This repository aims to be a nearly faithful Windows-native version of that proj
 
 ## Project status
 
-The repository currently contains the initial, compilable scaffold:
+The repository currently contains a working native MVP shell and WebView2 diagnostic tooling:
 
 - .NET 10;
 - WinUI 3 and Windows App SDK 2.2;
@@ -23,7 +23,7 @@ The repository currently contains the initial, compilable scaffold:
 - successful Debug build with zero warnings and zero errors;
 - normalized `Syltr` assembly, namespaces and application titles.
 
-No product features have been ported yet. The next milestone is the domain model and catalog, followed by the WebView2 isolation spike described below.
+The service and settings domain models, static catalog, atomic configuration persistence and unread-count parsing are ported with unit tests. The WebView2 spike now proves isolated persistent storage, same-profile popups and isolated profile deletion. Native permission routing is implemented and ready for visual device testing.
 
 ## Product vision
 
@@ -219,7 +219,7 @@ The implementation order follows the module map above. Each porting task starts 
 
 ### Phase 0 — Foundation
 
-Status: **in progress**
+Status: **complete for the development foundation**
 
 - [x] Create an independent Git repository.
 - [x] Create the WinUI 3/MSIX application.
@@ -227,18 +227,19 @@ Status: **in progress**
 - [x] Align source modules with the Linux reference structure.
 - [x] Validate Debug build and test execution.
 - [x] Replace template namespaces, titles and placeholder classes.
-- [ ] Add repository documentation, formatting rules and CI.
-- [ ] Add the initial application icon and licensing files.
+- [x] Add repository documentation, formatting rules and CI.
+- [x] Add the initial application icon and licensing files.
 
 ### Phase 1 — Domain and persistence
 
-- [ ] Port `ServiceDefinition` and settings models into `Config`.
-- [ ] Port ID generation and URL normalization into `Config`, and unread parsing into `Engine`.
-- [ ] Port the service catalog into `Catalog`.
-- [ ] Add JSON serialization compatibility tests.
-- [ ] Implement atomic service/settings persistence.
-- [ ] Define local application data paths.
-- [ ] Add an explicit schema/version migration strategy.
+- [x] Port `ServiceDefinition` and settings models into `Config`.
+- [x] Port ID generation and URL normalization into `Config`.
+- [x] Port unread parsing into `Engine`.
+- [x] Port the service catalog into `Catalog`.
+- [x] Add JSON serialization compatibility tests.
+- [x] Implement atomic service/settings persistence.
+- [x] Define local application data paths.
+- [x] Add an explicit schema/version migration strategy.
 
 Exit criterion: catalog and service configuration can be created, saved, loaded and tested without WinUI or WebView2.
 
@@ -246,11 +247,25 @@ Exit criterion: catalog and service configuration can be created, saved, loaded 
 
 This is the most important technical gate.
 
-- [ ] Create a shared WebView2 environment with an explicit user data folder.
-- [ ] Create at least three simultaneous profiles.
+Status: **basic profile storage isolation proven**. Three named profiles have
+been validated against the same origin across an application restart. See
+[`docs/architecture/0002-webview2-profile-isolation-spike.md`](docs/architecture/0002-webview2-profile-isolation-spike.md).
+Google and Microsoft sign-in entry pages have loaded in separate profiles, but
+credentialed authentication is still pending.
+Camera, microphone, geolocation, notification and clipboard requests now pass
+through a native per-origin/per-profile confirmation dialog; validation on real
+devices and services is still pending.
+Downloads are routed to the Windows known Downloads folder with sanitized,
+collision-free names and native progress feedback. Web notifications are
+captured behind the Engine abstraction and can be forwarded to Windows App SDK
+app notifications; end-to-end runtime validation of normal and service-worker
+notifications remains pending.
+
+- [x] Create a shared WebView2 environment with an explicit user data folder.
+- [x] Create at least three simultaneous profiles.
 - [ ] Prove two independent logins to the same service.
 - [ ] Prove that closing and reopening the app preserves both sessions.
-- [ ] Prove that removing one profile does not affect another.
+- [x] Prove that removing one profile does not affect another.
 - [ ] Validate Google and Microsoft authentication.
 - [ ] Validate OAuth/SSO popup handling within the originating profile.
 - [ ] Validate normal and service-worker notifications.
@@ -265,28 +280,28 @@ If WinUI 3 hosting exposes a blocking limitation, the platform-independent behav
 
 ### Phase 3 — Minimum viable product
 
-- [ ] Implement the native window and compact service rail.
-- [ ] Add services from the catalog or a custom URL.
-- [ ] Add, edit, remove, disable and reorder services.
-- [ ] Group multiple instances of the same service.
-- [ ] Host and switch between persistent service views.
-- [ ] Implement back, forward, home and reload.
-- [ ] Open user-clicked external links in the default browser.
-- [ ] Keep OAuth/SSO navigation in the appropriate in-app popup.
-- [ ] Display favicon and unread badge.
-- [ ] Add loading, empty, disabled and error states.
-- [ ] Implement the original keyboard shortcuts where they fit Windows conventions.
+- [x] Implement the native window and compact service rail.
+- [x] Add services from the catalog or a custom URL.
+- [x] Add, edit, remove, disable and reorder services.
+- [x] Group multiple instances of the same service.
+- [x] Host and switch between persistent service views.
+- [x] Implement back, forward, home and reload.
+- [x] Open user-clicked external links in the default browser.
+- [x] Keep OAuth/SSO navigation in the appropriate in-app popup.
+- [x] Display favicon and unread badge.
+- [x] Add loading, empty, disabled and error states.
+- [x] Implement the original keyboard shortcuts where they fit Windows conventions.
 
 Exit criterion: a user can configure multiple services/accounts, restart the app and use them reliably.
 
 ### Phase 4 — Feature parity
 
-- [ ] Native notifications with per-service mute.
-- [ ] Global do-not-disturb.
-- [ ] Notification activation that selects the correct service.
-- [ ] Downloads to the Windows Downloads folder.
-- [ ] Collision-free download filenames and completion notification.
-- [ ] Custom user-agent per service.
+- [x] Native notifications with per-service mute.
+- [x] Global do-not-disturb.
+- [x] Notification activation that selects the correct service.
+- [x] Downloads to the Windows Downloads folder.
+- [x] Collision-free download filenames and completion notification.
+- [x] Custom user-agent per service.
 - [ ] Spell-check behavior and language strategy.
 - [ ] Debug console capture and diagnostics.
 - [ ] Configuration import from the Linux application.
@@ -296,7 +311,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 ### Phase 5 — Hardening and distribution
 
 - [ ] Automated test matrix for core services.
-- [ ] CI build and tests for pull requests.
+- [x] CI build and tests for pull requests.
 - [ ] Release build and MSIX generation.
 - [ ] Package identity, publisher and signing strategy.
 - [ ] WebView2 Evergreen prerequisite handling.
@@ -420,6 +435,64 @@ dotnet run --project src/Syltr/Syltr.csproj
 
 The application is configured for packaged execution with debug identity support. Distribution packaging and signing are not finalized.
 
+### Visual MVP and WebView2 isolation test
+
+The current window is the native MVP shell. Local diagnostic services remain
+available for the Phase 2 profile-isolation checks. The normal packaged debug
+command requires Windows Developer Mode; the unpackaged self-contained helper
+below does not.
+
+1. Run `powershell -ExecutionPolicy Bypass -File scripts/run-isolation-spike.ps1`.
+   This builds an unpackaged, self-contained diagnostic and does not require
+   Windows Developer Mode.
+2. Wait until the status bar confirms isolation for the current run.
+3. If preferred, enable Windows Developer Mode and use the normal packaged
+   command `dotnet run --project src/Syltr/Syltr.csproj` instead.
+4. In `profile-a`, `profile-b` and `profile-c`, save a different account name.
+5. Switch between the tabs and confirm each name stays in its own profile.
+6. Close and reopen Syltr. The status bar must report that isolation and
+   persistence were both confirmed, and the three names and visit counters must
+   still be present.
+7. Use **Open popup in the same profile** and confirm the native popup displays
+   the saved name from its originating profile.
+8. Select WhatsApp, Gmail, Teams or Outlook and choose **Open in all 3 profiles**
+   to perform real multi-account authentication tests.
+9. Use **Delete profile** only with diagnostic/test accounts, then confirm the
+   remaining tabs retain their data and sessions.
+10. Return to **Diagnostic local** and test camera, microphone, location,
+    notifications and clipboard. Confirm the native dialog identifies the
+    origin and profile. Clear **Remember for this profile** when you want the
+    same prompt to appear again.
+11. Choose **Download test file** twice. Confirm the status bar reports
+    completion and the Downloads folder contains the original name plus a
+    collision-safe `(1)` copy.
+12. Use **Normal notification** and **Service worker notification**. Confirm a
+    Windows notification appears and **Open service** selects its originating
+    profile; clicking the Windows notification should do the same.
+13. Select a file in the upload test and paste an image into the clipboard test
+    area. The page should show file metadata and an image preview without
+    uploading either item anywhere.
+14. Use **Add** to choose a catalog service or enter a custom URL. Edit it from
+    the overflow menu, mute or disable it, drag its tab to reorder it, restart
+    Syltr and confirm its order and isolated session persist. Re-enable a
+    disabled service and confirm the prior session returns.
+15. Set `SYLTR_DEBUG=1`, add enough diagnostic/custom instances to reach 5, 10
+    and 20 loaded services. At each point choose **Measure memory** from the diagnostic submenu and
+    record the WebView2 working set, private memory and process count.
+16. Add a second instance of the same catalog service. Confirm the rail keeps a
+    single grouped tile and shows the account/instance selector above the web
+    content; its badge should aggregate unread counts from the group.
+17. Follow a cross-origin link and confirm the native choice offers Syltr for
+    OAuth/SSO or the default browser for a normal external link, without showing
+    URL paths or query strings in the prompt.
+18. Validate `Ctrl+N`, `Ctrl+E`, `Ctrl+R`, `Ctrl+Tab`,
+    `Ctrl+Shift+Tab`, `Alt+Left`, `Alt+Right` and `Ctrl+Shift+M`.
+
+The diagnostic page is local and uses the same `https://syltr.test` origin in
+every WebView. Only the WebView2 profile changes, so distinct values demonstrate
+storage isolation without requiring real service credentials. This diagnostic
+will be replaced by the native service rail after the isolation gate is proven.
+
 ## Engineering conventions
 
 - Nullable reference types remain enabled.
@@ -466,9 +539,9 @@ Service names and logos may be trademarks of their respective owners. Before dis
 
 ## Immediate next steps
 
-1. Port `ServiceDefinition`, settings, service ID generation and URL normalization into `Config`, with tests.
-2. Port the static service catalog into `Catalog`, preserving the reference recipes and categories.
-3. Port unread parsing and its tests into `Engine/Unread`.
-4. Implement JSON persistence and Windows application data paths in `Config`.
-5. Build the WebView2 multiple-profile spike in `Engine` behind `ServiceViewHost`.
-6. Port the `Window`, `Icon` and `Spellcheck` behavior module by module, recording any intentional divergence from Linux in this README.
+1. Complete credentialed Google and Microsoft multi-account authentication tests.
+2. Validate the native permission flow with real camera, microphone and location devices.
+3. Complete runtime validation of downloads, clipboard image paste and service-worker notifications.
+4. Measure browser memory and exercise the implemented WebView2 process-failure recovery.
+5. Complete the remaining items in [`docs/linux-fidelity-audit.md`](docs/linux-fidelity-audit.md).
+6. Port the supported `Spellcheck` behavior and localized resources module by module.

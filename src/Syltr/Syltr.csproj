@@ -16,6 +16,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- Keep the WinUI-free domain test build separate from normal app artifacts. -->
+  <PropertyGroup Condition="'$(DomainTestBuild)' == 'true'">
+    <OutputPath>bin\$(Configuration)\domain-tests\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\domain-tests\</IntermediateOutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -25,11 +31,22 @@
     <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\AppIcon.ico" />
+    <Content Include="Assets\ServiceIcons\*.svg" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Engine\Spike\isolation.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Engine\Spike\download-test.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Engine\Spike\notification-worker.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
+    <EmbeddedResource Include="Catalog\Services.json" />
   </ItemGroup>
 
   <!--

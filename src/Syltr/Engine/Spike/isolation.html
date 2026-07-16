@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de isolamento</title>
+  <style>
+    :root { color-scheme: light dark; font-family: "Segoe UI", sans-serif; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0f172a; color: #e2e8f0; }
+    main { width: min(560px, calc(100% - 48px)); padding: 32px; border: 1px solid #334155; border-radius: 20px; background: #1e293b; box-shadow: 0 24px 60px #02061780; }
+    .label { color: #7dd3fc; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 8px 0 12px; font-size: 30px; }
+    p { color: #cbd5e1; line-height: 1.5; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; margin: 24px 0; padding: 18px; border-radius: 12px; background: #0f172a; }
+    dt { color: #94a3b8; }
+    dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+    form, .actions { display: flex; gap: 10px; }
+    .actions { margin-top: 12px; }
+    .permissions { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
+    .permission-result { min-height: 24px; margin: 12px 0 0; color: #bae6fd; font-size: 14px; }
+    .file-tests { display: grid; gap: 12px; margin-top: 18px; padding: 16px; border-radius: 12px; background: #0f172a; }
+    .file-picker { display: grid; gap: 8px; }
+    .paste-zone { min-height: 72px; padding: 14px; border: 1px dashed #64748b; border-radius: 9px; color: #cbd5e1; outline: none; }
+    .paste-zone:focus { border-color: #38bdf8; }
+    .paste-preview { display: none; max-width: 100%; max-height: 180px; border-radius: 8px; }
+    input { min-width: 0; flex: 1; padding: 11px 12px; border: 1px solid #475569; border-radius: 8px; background: #0f172a; color: inherit; }
+    button, a { padding: 11px 16px; border: 0; border-radius: 8px; background: #0ea5e9; color: #082f49; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; }
+    button.secondary { background: #334155; color: #e2e8f0; }
+    .ok { margin-top: 20px; color: #86efac; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="label">WebView2 profile isolation spike</div>
+    <h1 id="heading">Perfil</h1>
+    <p>Defina um nome diferente em cada aba. Ele deve permanecer isolado nas outras abas e sobreviver ao reinício do Syltr.</p>
+    <dl>
+      <dt>Perfil</dt><dd id="profile"></dd>
+      <dt>Nome salvo</dt><dd id="saved-name">Ainda não definido</dd>
+      <dt>Visitas neste perfil</dt><dd id="visits"></dd>
+      <dt>Origem</dt><dd id="origin"></dd>
+    </dl>
+    <form id="form">
+      <input id="name" autocomplete="off" placeholder="Ex.: conta pessoal">
+      <button type="submit">Salvar neste perfil</button>
+    </form>
+    <div class="actions">
+      <button class="secondary" id="popup" type="button">Abrir popup no mesmo perfil</button>
+    </div>
+    <p>Teste o diálogo nativo de permissões. Cada decisão pode ser lembrada somente neste perfil.</p>
+    <div class="permissions">
+      <button class="secondary" id="camera" type="button">Testar câmera</button>
+      <button class="secondary" id="microphone" type="button">Testar microfone</button>
+      <button class="secondary" id="location" type="button">Testar localização</button>
+      <button class="secondary" id="notifications" type="button">Testar notificações</button>
+      <button class="secondary" id="worker-notification" type="button">Notificação SW</button>
+      <button class="secondary" id="clipboard" type="button">Ler clipboard</button>
+      <a id="download" download="syltr-download-test.txt" href="/download-test.txt">Baixar arquivo teste</a>
+    </div>
+    <div class="permission-result" id="permission-result" role="status"></div>
+    <div class="file-tests">
+      <label class="file-picker">
+        <strong>Upload / seletor de arquivo</strong>
+        <input id="upload" type="file">
+      </label>
+      <div id="upload-result">Nenhum arquivo selecionado.</div>
+      <strong>Colar imagem</strong>
+      <div class="paste-zone" id="paste-zone" contenteditable="true" role="textbox" tabindex="0">Clique aqui e pressione Ctrl+V com uma imagem no clipboard.</div>
+      <img class="paste-preview" id="paste-preview" alt="Prévia da imagem colada">
+      <div id="paste-result"></div>
+    </div>
+    <div class="ok">✓ Ambiente compartilhado, armazenamento deste perfil isolado</div>
+  </main>
+  <script>
+    const profile = new URLSearchParams(location.search).get('profile') || 'desconhecido';
+    const visits = Number(localStorage.getItem('syltr-visits') || 0) + 1;
+    localStorage.setItem('syltr-visits', String(visits));
+
+    const render = () => {
+      const savedName = localStorage.getItem('syltr-name');
+      const isPopup = new URLSearchParams(location.search).has('popup');
+      document.querySelector('#heading').textContent = isPopup ? `Popup do ${profile}` : `Perfil ${profile}`;
+      document.querySelector('#profile').textContent = profile;
+      document.querySelector('#saved-name').textContent = savedName || 'Ainda não definido';
+      document.querySelector('#visits').textContent = String(visits);
+      document.querySelector('#origin').textContent = location.origin;
+      document.title = savedName ? `${savedName} — isolamento Syltr` : `${profile} — isolamento Syltr`;
+    };
+
+    document.querySelector('#form').addEventListener('submit', event => {
+      event.preventDefault();
+      const value = document.querySelector('#name').value.trim();
+      if (value) localStorage.setItem('syltr-name', value);
+      else localStorage.removeItem('syltr-name');
+      render();
+    });
+
+    document.querySelector('#popup').addEventListener('click', () => {
+      window.open(
+        `/isolation.html?profile=${encodeURIComponent(profile)}&popup=1`,
+        'syltr-auth-popup',
+        'width=760,height=620');
+    });
+
+    const showPermissionResult = message => {
+      document.querySelector('#permission-result').textContent = message;
+    };
+
+    const testMedia = async constraints => {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+    const runPermissionTest = async (label, operation) => {
+      showPermissionResult(`Solicitando ${label}…`);
+      try {
+        await operation();
+        showPermissionResult(`${label}: acesso concluído.`);
+      } catch (error) {
+        showPermissionResult(`${label}: ${error.name || 'acesso não disponível'}.`);
+      }
+    };
+
+    document.querySelector('#camera').addEventListener('click', () =>
+      runPermissionTest('Câmera', () => testMedia({ video: true })));
+    document.querySelector('#microphone').addEventListener('click', () =>
+      runPermissionTest('Microfone', () => testMedia({ audio: true })));
+    document.querySelector('#location').addEventListener('click', () =>
+      runPermissionTest('Localização', () => new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject))));
+    const ensureNotificationPermission = async () => {
+      const result = Notification.permission === 'granted'
+        ? 'granted'
+        : await Notification.requestPermission();
+      if (result !== 'granted') throw new DOMException('Permissão negada', 'NotAllowedError');
+    };
+
+    document.querySelector('#notifications').addEventListener('click', () =>
+      runPermissionTest('Notificação normal', async () => {
+        await ensureNotificationPermission();
+        const notification = new Notification('Teste de notificação Syltr', {
+          body: `Notificação normal do ${profile}`,
+          tag: `syltr-normal-${profile}`
+        });
+        notification.onclick = () => showPermissionResult('Notificação normal: clique recebido pelo serviço.');
+        notification.onclose = () => showPermissionResult('Notificação normal: fechamento recebido pelo serviço.');
+      }));
+    document.querySelector('#worker-notification').addEventListener('click', () =>
+      runPermissionTest('Notificação service worker', async () => {
+        await ensureNotificationPermission();
+        if (!('serviceWorker' in navigator)) throw new DOMException('Service worker indisponível', 'NotSupportedError');
+        await navigator.serviceWorker.register('/notification-worker.js');
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification('Teste service worker Syltr', {
+          body: `Notificação persistente do ${profile}`,
+          tag: `syltr-worker-${profile}`,
+          data: { profile }
+        });
+      }));
+    document.querySelector('#clipboard').addEventListener('click', () =>
+      runPermissionTest('Clipboard', () => navigator.clipboard.readText()));
+
+    navigator.serviceWorker?.addEventListener('message', event => {
+      if (event.data?.type === 'notification-clicked') {
+        showPermissionResult(`Service worker: clique recebido para ${event.data.profile}.`);
+      }
+    });
+
+    document.querySelector('#upload').addEventListener('change', event => {
+      const file = event.target.files[0];
+      document.querySelector('#upload-result').textContent = file
+        ? `${file.name} · ${file.type || 'tipo desconhecido'} · ${file.size} bytes`
+        : 'Nenhum arquivo selecionado.';
+    });
+
+    document.querySelector('#paste-zone').addEventListener('paste', event => {
+      const imageItem = [...event.clipboardData.items].find(item => item.type.startsWith('image/'));
+      if (!imageItem) {
+        document.querySelector('#paste-result').textContent = 'O clipboard não contém uma imagem.';
+        return;
+      }
+
+      event.preventDefault();
+      const file = imageItem.getAsFile();
+      const preview = document.querySelector('#paste-preview');
+      preview.onload = () => {
+        document.querySelector('#paste-result').textContent =
+          `${file.type} · ${file.size} bytes · ${preview.naturalWidth}×${preview.naturalHeight}`;
+        preview.style.display = 'block';
+      };
+      preview.src = URL.createObjectURL(file);
+    });
+
+    render();
+  </script>
+</body>
+</html>

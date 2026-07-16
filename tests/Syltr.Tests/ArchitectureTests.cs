@@ -35,6 +35,20 @@ public class ArchitectureTests
         Assert.Contains("x:Class=\"Syltr.Window.MainWindow\"", windowXaml);
     }
 
+    [Fact]
+    public void WindowDoesNotDependOnCoreWebView2()
+    {
+        var windowRoot = Path.Combine(FindRepositoryRoot(), "src", "Syltr", "Window");
+        var source = Directory.EnumerateFiles(windowRoot, "*.cs", SearchOption.AllDirectories)
+            .Select(File.ReadAllText);
+
+        Assert.All(source, text =>
+        {
+            Assert.DoesNotContain("Microsoft.Web.WebView2", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("CoreWebView2", text, StringComparison.Ordinal);
+        });
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

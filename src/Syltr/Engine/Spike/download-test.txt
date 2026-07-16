@@ -1,0 +1,3 @@
+Syltr for Windows download integration test.
+
+If this file is in your Downloads folder, the WebView2 download route completed successfully.

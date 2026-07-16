@@ -5,6 +5,464 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="OnLoaded"
+    Unloaded="OnUnloaded"
     mc:Ignorable="d">
-    <Grid />
+    <Page.Resources>
+        <SolidColorBrush x:Key="RailBackgroundBrush" Color="#202225" />
+        <SolidColorBrush x:Key="RailHoverBrush" Color="#2B2E33" />
+        <SolidColorBrush x:Key="RailSelectedBrush" Color="#33363C" />
+        <SolidColorBrush x:Key="RailIconBackgroundBrush" Color="#3A3D43" />
+
+        <Style x:Key="HeaderIconButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="HeaderButtonSurface" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderButtonSurface.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderButtonSurface.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderButtonSurface.Opacity" Value="0.4" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HeaderToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="HeaderToggleSurface" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderToggleSurface.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderToggleSurface.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderToggleSurface.Opacity" Value="0.4" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CheckStates">
+                                    <VisualState x:Name="Unchecked" />
+                                    <VisualState x:Name="Checked">
+                                        <VisualState.Setters>
+                                            <Setter Target="HeaderToggleContent.Foreground" Value="#E01B24" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                x:Name="HeaderToggleContent"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ServiceRailItemStyle" TargetType="ListViewItem">
+            <Setter Property="Width" Value="84" />
+            <Setter Property="Height" Value="52" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid x:Name="RailItemRoot" Background="Transparent">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailHoverBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="SelectionStrip.Visibility" Value="Visible" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="SelectedPointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="SelectionStrip.Visibility" Value="Visible" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="SelectedPressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="RailItemRoot.Background" Value="{StaticResource RailSelectedBrush}" />
+                                            <Setter Target="SelectionStrip.Visibility" Value="Visible" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border
+                                x:Name="SelectionStrip"
+                                Width="3"
+                                HorizontalAlignment="Left"
+                                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                Visibility="Collapsed" />
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Invoked="OnAddServiceAccelerator" Key="N" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnEditServiceAccelerator" Key="E" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnReloadAccelerator" Key="R" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnReloadAccelerator" Key="F5" />
+        <KeyboardAccelerator Invoked="OnHomeAccelerator" Key="Home" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnBackAccelerator" Key="Left" Modifiers="Menu" />
+        <KeyboardAccelerator Invoked="OnForwardAccelerator" Key="Right" Modifiers="Menu" />
+        <KeyboardAccelerator Invoked="OnNextServiceAccelerator" Key="Tab" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnPreviousServiceAccelerator" Key="Tab" Modifiers="Control,Shift" />
+        <KeyboardAccelerator Invoked="OnNextServiceAccelerator" Key="PageDown" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnNextServiceAccelerator" Key="Down" Modifiers="Menu" />
+        <KeyboardAccelerator Invoked="OnPreviousServiceAccelerator" Key="PageUp" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnPreviousServiceAccelerator" Key="Up" Modifiers="Menu" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number1" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number2" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number3" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number4" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number5" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number6" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number7" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number8" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnGotoServiceAccelerator" Key="Number9" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnQuitAccelerator" Key="Q" Modifiers="Control" />
+        <KeyboardAccelerator Invoked="OnDoNotDisturbAccelerator" Key="M" Modifiers="Control,Shift" />
+    </Page.KeyboardAccelerators>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- One compact GNOME-style toolbar, also used as the custom Windows title bar. -->
+        <Grid
+            x:Name="AppHeader"
+            Grid.Row="0"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="138" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Margin="6,0,4,0" VerticalAlignment="Center" Orientation="Horizontal">
+                <Button
+                    AutomationProperties.Name="Menu principal"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Menu principal">
+                    <Button.Content><SymbolIcon Symbol="GlobalNavigationButton" /></Button.Content>
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                            <MenuFlyoutItem Click="OnSpellLanguagesClick" Text="Idiomas de correção…" />
+                            <MenuFlyoutSubItem x:Name="DiagnosticsMenuItem" Text="Diagnóstico" Visibility="Collapsed">
+                                <MenuFlyoutItem Click="OnRecoverClick" Text="Recuperar serviço" />
+                                <MenuFlyoutItem Click="OnMeasureMemoryClick" Text="Medir memória" />
+                                <MenuFlyoutItem Click="OnTestWindowsNotificationClick" Text="Testar notificação do Windows" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Click="OnAboutClick" Text="Sobre o Syltr" />
+                            <MenuFlyoutItem Click="OnExitClick" Text="Sair" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+                <Button
+                    AutomationProperties.Name="Adicionar serviço"
+                    Click="OnAddServiceClick"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Adicionar serviço (Ctrl+N)">
+                    <SymbolIcon Symbol="Add" />
+                </Button>
+                <Button
+                    AutomationProperties.Name="Voltar"
+                    Click="OnBackClick"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Voltar (Alt+Esquerda)">
+                    <SymbolIcon Symbol="Back" />
+                </Button>
+                <Button
+                    AutomationProperties.Name="Avançar"
+                    Click="OnForwardClick"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Avançar (Alt+Direita)">
+                    <SymbolIcon Symbol="Forward" />
+                </Button>
+                <Button
+                    AutomationProperties.Name="Recarregar"
+                    Click="OnReloadClick"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Recarregar (Ctrl+R)">
+                    <SymbolIcon Symbol="Refresh" />
+                </Button>
+                <Button
+                    AutomationProperties.Name="Ir para o início"
+                    Click="OnHomeClick"
+                    Style="{StaticResource HeaderIconButtonStyle}"
+                    ToolTipService.ToolTip="Ir para o início">
+                    <SymbolIcon Symbol="Home" />
+                </Button>
+            </StackPanel>
+
+            <Grid x:Name="TitleDragRegion" Grid.Column="1" Background="Transparent">
+                <TextBlock
+                    x:Name="ServiceTitleText"
+                    MaxWidth="420"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Text="Syltr"
+                    TextTrimming="CharacterEllipsis" />
+            </Grid>
+
+            <ToggleButton
+                x:Name="DoNotDisturbButton"
+                Grid.Column="2"
+                Margin="2,0,8,0"
+                HorizontalAlignment="Right"
+                AutomationProperties.AutomationId="DoNotDisturbButton"
+                AutomationProperties.Name="Não perturbe"
+                Checked="OnDoNotDisturbChanged"
+                Style="{StaticResource HeaderToggleButtonStyle}"
+                ToolTipService.ToolTip="Não perturbe (Ctrl+Shift+M)"
+                Unchecked="OnDoNotDisturbChanged">
+                <FontIcon x:Name="DoNotDisturbIcon" Glyph="&#xEA8F;" />
+            </ToggleButton>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="84" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Ferdium-inspired, icon-only service rail. -->
+            <Grid Background="{StaticResource RailBackgroundBrush}">
+                <ListView
+                    x:Name="ServiceRail"
+                    AllowDrop="True"
+                    AutomationProperties.AutomationId="ServiceRail"
+                    AutomationProperties.Name="Serviços"
+                    CanDragItems="True"
+                    CanReorderItems="True"
+                    DragItemsCompleted="OnRailDragItemsCompleted"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnRailItemClick"
+                    ItemContainerStyle="{StaticResource ServiceRailItemStyle}"
+                    RightTapped="OnServiceRailRightTapped"
+                    SelectionChanged="OnProfileSelectionChanged"
+                    SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid
+                                Width="48"
+                                Height="48"
+                                AutomationProperties.Name="{Binding DisplayName}"
+                                Opacity="{Binding ActiveItem.Tile.Opacity}"
+                                ToolTipService.ToolTip="{Binding DisplayName}">
+                                <Border
+                                    Width="40"
+                                    Height="40"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="#555960"
+                                    CornerRadius="11"
+                                    Visibility="{Binding StackVisibility}">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform X="3" Y="-3" />
+                                    </Border.RenderTransform>
+                                </Border>
+                                <Border
+                                    Width="40"
+                                    Height="40"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{StaticResource RailIconBackgroundBrush}"
+                                    CornerRadius="11">
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="15"
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="{Binding ActiveItem.Tile.Initial}"
+                                            Visibility="{Binding ActiveItem.Tile.InitialVisibility}" />
+                                        <Image
+                                            Width="{Binding ActiveItem.Tile.FaviconSize}"
+                                            Height="{Binding ActiveItem.Tile.FaviconSize}"
+                                            Source="{Binding ActiveItem.Tile.IconSource}"
+                                            Stretch="Uniform"
+                                            Visibility="{Binding ActiveItem.Tile.IconVisibility}" />
+                                    </Grid>
+                                </Border>
+                                <Border
+                                    MinWidth="18"
+                                    Height="18"
+                                    Padding="4,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Background="#E01B24"
+                                    CornerRadius="9"
+                                    Visibility="{Binding UnreadVisibility}">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="10"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{Binding UnreadText}" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <ContentPresenter x:Name="ServiceContentPresenter" />
+                <Border
+                    x:Name="ServiceStateOverlay"
+                    AutomationProperties.AutomationId="ServiceStateOverlay"
+                    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                    Visibility="Collapsed">
+                    <StackPanel
+                        MaxWidth="440"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12">
+                        <ProgressRing
+                            x:Name="ServiceStateProgressRing"
+                            Width="36"
+                            Height="36"
+                            HorizontalAlignment="Center" />
+                        <TextBlock
+                            x:Name="ServiceStateTitle"
+                            HorizontalAlignment="Center"
+                            FontSize="22"
+                            FontWeight="SemiBold"
+                            TextAlignment="Center" />
+                        <TextBlock
+                            x:Name="ServiceStateMessage"
+                            HorizontalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                        <Button
+                            x:Name="ServiceStateActionButton"
+                            HorizontalAlignment="Center"
+                            Click="OnServiceStateActionClick" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Native feedback appears as a compact in-app toast, not as permanent chrome. -->
+                <InfoBar
+                    x:Name="StatusInfoBar"
+                    Width="520"
+                    Margin="16"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    AutomationProperties.AutomationId="StatusInfoBar"
+                    Closed="OnStatusInfoBarClosed"
+                    IsClosable="True"
+                    IsOpen="True"
+                    Message="Inicializando os serviços…"
+                    Severity="Informational"
+                    Title="Syltr" />
+            </Grid>
+        </Grid>
+
+        <!-- Kept off-screen for the technical validation actions; it is not product chrome. -->
+        <Grid Visibility="Collapsed">
+            <ComboBox x:Name="TargetSelector" SelectedIndex="0">
+                <ComboBoxItem Content="Diagnóstico local" Tag="local" />
+                <ComboBoxItem Content="WhatsApp Web" Tag="https://web.whatsapp.com/" />
+                <ComboBoxItem Content="Gmail" Tag="https://mail.google.com/" />
+                <ComboBoxItem Content="Microsoft Teams" Tag="https://teams.microsoft.com/" />
+                <ComboBoxItem Content="Outlook" Tag="https://outlook.live.com/mail/" />
+            </ComboBox>
+            <ComboBox
+                x:Name="InstanceSelector"
+                SelectionChanged="OnInstanceSelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate><TextBlock Text="{Binding Tile.Name}" /></DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock x:Name="ProfileStatusText" />
+        </Grid>
+    </Grid>
 </Page>
