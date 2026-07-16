@@ -20,6 +20,9 @@ namespace Syltr.Window;
 /// </summary>
 public sealed partial class MainPage : Page
 {
+    private const string NotificationsEnabledGlyph = "\uEA8F";
+    private const string DoNotDisturbGlyph = "\uE7ED";
+
     private readonly List<ServiceViewHost> _hosts = [];
     private readonly ObservableCollection<ServiceRailItem> _railItems = [];
     private readonly ObservableCollection<ServiceRailGroupItem> _railGroups = [];
@@ -107,7 +110,9 @@ public sealed partial class MainPage : Page
             var loadedSettings = await _settingsStore.LoadAsync();
             _settings = loadedSettings.Value;
             DoNotDisturbButton.IsChecked = _settings.DoNotDisturb;
-            DoNotDisturbIcon.Glyph = _settings.DoNotDisturb ? "\uEB71" : "\uEA8F";
+            DoNotDisturbIcon.Glyph = _settings.DoNotDisturb
+                ? DoNotDisturbGlyph
+                : NotificationsEnabledGlyph;
             _loadingSettings = false;
 
             var loaded = await _serviceStore.LoadAsync();
@@ -1371,7 +1376,9 @@ public sealed partial class MainPage : Page
         }
 
         _settings = _settings with { DoNotDisturb = DoNotDisturbButton.IsChecked == true };
-        DoNotDisturbIcon.Glyph = _settings.DoNotDisturb ? "\uEB71" : "\uEA8F";
+        DoNotDisturbIcon.Glyph = _settings.DoNotDisturb
+            ? DoNotDisturbGlyph
+            : NotificationsEnabledGlyph;
         await _settingsStore.SaveAsync(_settings);
         StatusInfoBar.Title = _settings.DoNotDisturb
             ? AppText.Get("DoNotDisturb_EnabledTitle")

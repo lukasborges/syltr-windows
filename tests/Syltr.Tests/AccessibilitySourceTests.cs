@@ -22,6 +22,10 @@ public sealed class AccessibilitySourceTests
         Assert.Contains("Style x:Key=\"HeaderSymbolIconViewboxStyle\" TargetType=\"Viewbox\"", xaml);
         Assert.Contains("Style=\"{StaticResource HeaderSymbolIconViewboxStyle}\"", xaml);
         Assert.Contains("Style=\"{StaticResource HeaderFontIconStyle}\"", xaml);
+        Assert.Contains("Segoe Fluent Icons, Segoe MDL2 Assets", xaml);
+        Assert.Contains("Foreground\" Value=\"{ThemeResource TextFillColorPrimaryBrush}\"", xaml);
+        Assert.Contains("DoNotDisturbGlyph = \"\\uE7ED\"", code);
+        Assert.DoesNotContain("\\uEB71", code);
         Assert.Contains("MaxWidth=\"520\"", xaml);
         Assert.Contains("ReorderMode=\"Enabled\"", xaml);
         Assert.Contains("CanReorderItems=\"True\"", xaml);
