@@ -35,6 +35,11 @@ publisher before signing. A paid organization-validation code-signing
 certificate is the fallback when retaining a publisher controlled by the
 project is more important than the cost.
 
+The public [code-signing policy](../CODE_SIGNING_POLICY.md) records the release
+rules and team roles required for that application. Repository readiness and
+the account-level steps that remain after acceptance are tracked in
+[`signpath-readiness.md`](signpath-readiness.md).
+
 The manually triggered `release-candidate.yml` workflow deliberately creates
 only an unsigned GitHub Actions artifact. It has read-only repository
 permissions and cannot create a public GitHub Release. After a signing provider

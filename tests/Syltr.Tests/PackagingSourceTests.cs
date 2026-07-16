@@ -48,6 +48,21 @@ public sealed class PackagingSourceTests
         Assert.DoesNotContain("action-gh-release", workflow, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void Code_signing_policy_declares_required_roles_and_privacy_policy()
+    {
+        var root = FindRepositoryRoot();
+        var policy = File.ReadAllText(Path.Combine(root, "CODE_SIGNING_POLICY.md"));
+
+        Assert.Contains(
+            "Free code signing provided by SignPath.io, certificate by SignPath Foundation",
+            policy,
+            StringComparison.Ordinal);
+        Assert.Contains("Committers and reviewers:", policy, StringComparison.Ordinal);
+        Assert.Contains("Approvers:", policy, StringComparison.Ordinal);
+        Assert.Contains("PRIVACY.md", policy, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

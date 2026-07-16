@@ -385,6 +385,24 @@ Possible later optimization:
 - Prefer the Evergreen WebView2 runtime for security updates.
 - Do not add telemetry without an explicit product decision and documentation.
 
+## Project policies
+
+- [Privacy policy](PRIVACY.md)
+- [Security policy](SECURITY.md)
+- [Code signing policy](CODE_SIGNING_POLICY.md)
+
+The code-signing service is pending SignPath Foundation acceptance. Until the
+trusted certificate and exact publisher are assigned, GitHub Actions produces
+only internal unsigned candidates and no installable public release.
+
+## Uninstallation
+
+Remove Syltr from **Settings → Apps → Installed apps → Syltr → Uninstall**.
+Because profiles and configuration are stored outside the installation folder,
+users who also want to erase saved sessions can close Syltr and remove
+`%LOCALAPPDATA%\Syltr` after uninstalling. This permanently removes configured
+services, cookies, browser profiles and diagnostic logs.
+
 ## Data locations and migration
 
 The final paths will be centralized in `Syltr.Config`. The intended categories are:
@@ -451,7 +469,9 @@ GitHub Releases is the selected public distribution and update channel. The
 manual release-candidate workflow currently uploads an unsigned artifact only;
 it cannot publish a release. See [`docs/distribution.md`](docs/distribution.md)
 for the stable asset names, App Installer flow and signing gate. The privacy
-policy is available in [`PRIVACY.md`](PRIVACY.md).
+policy is available in [`PRIVACY.md`](PRIVACY.md). SignPath application
+readiness and the remaining external steps are tracked in
+[`docs/signpath-readiness.md`](docs/signpath-readiness.md).
 
 ### Test
 
