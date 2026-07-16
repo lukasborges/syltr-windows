@@ -316,11 +316,12 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 - [ ] Automated test matrix for core services.
 - [x] CI build and tests for pull requests.
 - [x] Release build and MSIX generation (unsigned x64 artifact validated locally).
+- [x] GitHub Releases selected as the installer/update channel; internal release-candidate workflow prepared.
 - [ ] Package identity, publisher and signing strategy.
 - [ ] WebView2 Evergreen prerequisite handling.
 - [ ] x64 release first; ARM64 after validation.
 - [ ] Upgrade and uninstall behavior.
-- [ ] Privacy, telemetry and diagnostic policy.
+- [x] Privacy, telemetry and diagnostic policy.
 - [x] License and third-party notices.
 - [ ] Beta release and feedback loop.
 
@@ -446,6 +447,12 @@ Machines without the Visual C++ UWP symbol tools may report that
 `mspdbcmf.exe` is unavailable; this skips only the optional symbol package and
 does not prevent MSIX generation.
 
+GitHub Releases is the selected public distribution and update channel. The
+manual release-candidate workflow currently uploads an unsigned artifact only;
+it cannot publish a release. See [`docs/distribution.md`](docs/distribution.md)
+for the stable asset names, App Installer flow and signing gate. The privacy
+policy is available in [`PRIVACY.md`](PRIVACY.md).
+
 ### Test
 
 ```powershell
@@ -539,7 +546,7 @@ The following items are deliberately unresolved until evidence is collected:
 - real-service validation of the automatic link versus OAuth/SSO classification;
 - whether all enabled services remain loaded indefinitely;
 - configuration storage path for packaged versus unpackaged development;
-- installer/update channel and code-signing identity;
+- code-signing identity and final package publisher;
 - minimum supported Windows release for the first public build;
 - whether ARM64 ships with the first stable release;
 - final application ID and package publisher.
@@ -567,5 +574,6 @@ Service names and logos may be trademarks of their respective owners. Before dis
    [`docs/accessibility-test-plan.md`](docs/accessibility-test-plan.md).
 2. Validate a service-specific user-agent rule or compatibility script only
    when a real service demonstrates a Chromium/WebView2 failure.
-3. Start release hardening: the core-service test matrix, Release MSIX,
-   package identity/signing, WebView2 prerequisite handling and upgrade tests.
+3. Apply for trusted open-source code signing, replace the provisional package
+   publisher with the assigned certificate subject and enable signed GitHub
+   Releases.

@@ -22,6 +22,32 @@ public sealed class PackagingSourceTests
             packageVersion);
     }
 
+    [Fact]
+    public void Appinstaller_generator_targets_stable_github_release_assets()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "scripts", "new-appinstaller.ps1"));
+
+        Assert.Contains("releases/latest/download", script, StringComparison.Ordinal);
+        Assert.Contains("Syltr-$architecture.msix", script, StringComparison.Ordinal);
+        Assert.Contains("appinstaller/2017/2", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Unsigned_release_candidate_cannot_publish_repository_contents()
+    {
+        var root = FindRepositoryRoot();
+        var workflow = File.ReadAllText(
+            Path.Combine(root, ".github", "workflows", "release-candidate.yml"));
+
+        Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
+        Assert.Contains("contents: read", workflow, StringComparison.Ordinal);
+        Assert.Contains("actions/upload-artifact@v7", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("contents: write", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("gh release", workflow, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("action-gh-release", workflow, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
