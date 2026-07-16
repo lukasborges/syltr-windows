@@ -24,6 +24,7 @@ public sealed class ServiceViewHost : IDisposable
     private CoreWebView2Profile? _profile;
     private bool _initialized;
     private bool _disposed;
+    private bool _isForeground = true;
     private ServiceViewState _state = new(ServiceViewStatus.Created, string.Empty, 0, false, false);
 
     public ServiceViewHost(
@@ -54,6 +55,8 @@ public sealed class ServiceViewHost : IDisposable
     public string ProfileName { get; }
 
     public bool IsInitialized => _initialized && !_disposed;
+
+    public bool IsForeground => _isForeground;
 
     public FrameworkElement Content => _content;
 
@@ -97,6 +100,7 @@ public sealed class ServiceViewHost : IDisposable
 
             await _webView.EnsureCoreWebView2Async(environment, controllerOptions);
             _profile = _webView.CoreWebView2.Profile;
+            ApplyMemoryUsageTarget();
             _webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
             _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
             if (_captureConsole)
@@ -219,6 +223,16 @@ public sealed class ServiceViewHost : IDisposable
     {
         EnsureReady();
         _webView.CoreWebView2.IsMuted = muted;
+    }
+
+    public void SetForeground(bool isForeground)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _isForeground = isForeground;
+        if (_initialized)
+        {
+            ApplyMemoryUsageTarget();
+        }
     }
 
     public async Task RecoverAsync()
@@ -769,6 +783,13 @@ public sealed class ServiceViewHost : IDisposable
         {
             throw new InvalidOperationException("The service view has not been initialized.");
         }
+    }
+
+    private void ApplyMemoryUsageTarget()
+    {
+        _webView.CoreWebView2.MemoryUsageTargetLevel = _isForeground
+            ? CoreWebView2MemoryUsageTargetLevel.Normal
+            : CoreWebView2MemoryUsageTargetLevel.Low;
     }
 
     private void DetachCoreEvents()

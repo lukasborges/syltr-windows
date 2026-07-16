@@ -11,7 +11,7 @@ Windows. A auditoria detalhada de paridade continua em
 - O aplicativo compila em Debug sem avisos ou erros.
 - O aplicativo compila em Release sem avisos ou erros e o script
   `scripts/build-msix.ps1` gera um MSIX x64 não assinado.
-- A suíte possui 130 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 131 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -66,6 +66,11 @@ Windows. A auditoria detalhada de paridade continua em
 - O aviso rotineiro **Iniciando serviços** não é mais exibido sobre o conteúdo;
   o `InfoBar` inicia fechado e permanece reservado a erros, alertas e feedback
   de ações do usuário.
+- WebViews de serviços em segundo plano solicitam a meta de memória `Low` do
+  WebView2, restaurando `Normal` antes de exibir o serviço selecionado. Um A/B
+  com oito serviços carregados mediu redução média de 72,5 MB (3,2%) no working
+  set privado sem suspender scripts, contadores ou notificações; detalhes em
+  [`architecture/0006-background-webview-memory.md`](architecture/0006-background-webview-memory.md).
 
 ## Decisões visuais aprovadas
 

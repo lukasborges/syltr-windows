@@ -141,6 +141,7 @@ public sealed partial class MainPage : Page
             }
 
             ServiceRail.SelectedIndex = 0;
+            UpdateWebViewMemoryTargets();
             var enabledHosts = _hosts
                 .Where(host => host.State.Status != ServiceViewStatus.Disabled)
                 .ToArray();
@@ -484,6 +485,7 @@ public sealed partial class MainPage : Page
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
         _changingInstanceSelection = false;
+        UpdateWebViewMemoryTargets();
         ServiceContentPresenter.Content = group?.ActiveItem.Content;
         UpdateSelectedProfileStatus();
         UpdateServiceOverlay();
@@ -499,6 +501,7 @@ public sealed partial class MainPage : Page
         }
 
         group.ActiveItem = item;
+        UpdateWebViewMemoryTargets();
         ServiceContentPresenter.Content = item.Content;
         UpdateSelectedProfileStatus();
         UpdateServiceOverlay();
@@ -1634,6 +1637,15 @@ public sealed partial class MainPage : Page
         SelectedHost() is { IsInitialized: true } host
             ? host
             : null;
+
+    private void UpdateWebViewMemoryTargets()
+    {
+        var foregroundHost = SelectedHost();
+        foreach (var host in _hosts)
+        {
+            host.SetForeground(ReferenceEquals(host, foregroundHost));
+        }
+    }
 
     private void ShowProbeResult(ProfileIsolationProbeResult result)
     {
