@@ -1,7 +1,7 @@
 namespace Syltr.Engine;
 
 /// <summary>
-/// A user-initiated cross-origin navigation paused for a native disposition decision.
+/// A user-clicked link that requested a separate browsing context.
 /// </summary>
 public sealed class ServiceExternalNavigationRequestedEventArgs : EventArgs
 {

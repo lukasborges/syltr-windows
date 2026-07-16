@@ -15,6 +15,7 @@ public sealed class ServiceViewHost : IDisposable
     private WebView2 _webView;
     private Uri _homeUri;
     private readonly ServiceViewContentMapping? _contentMapping;
+    private readonly string _externalLinkMessageToken = ExternalLinkClickBridge.CreateToken();
     private string? _userAgent;
     private readonly HashSet<DownloadTracker> _downloads = [];
     private TaskCompletionSource<bool>? _initialNavigation;
@@ -90,6 +91,10 @@ public sealed class ServiceViewHost : IDisposable
 
             await _webView.EnsureCoreWebView2Async(environment, controllerOptions);
             _profile = _webView.CoreWebView2.Profile;
+            _webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+            _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+            await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                ExternalLinkClickBridge.CreateScript(_externalLinkMessageToken));
             if (_userAgent is not null)
             {
                 _webView.CoreWebView2.Settings.UserAgent = _userAgent;
@@ -317,26 +322,34 @@ public sealed class ServiceViewHost : IDisposable
 
     private void OnNavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
     {
-        if (args.IsUserInitiated &&
-            !args.IsRedirected &&
-            Uri.TryCreate(args.Uri, UriKind.Absolute, out var destination) &&
-            destination.Scheme is "http" or "https" &&
-            !HasSameOrigin(_homeUri, destination))
-        {
-            args.Cancel = true;
-            var handler = ExternalNavigationRequested;
-            if (handler is not null)
-            {
-                handler.Invoke(
-                    this,
-                    new ServiceExternalNavigationRequestedEventArgs(ProfileName, destination));
-            }
+        UpdateState(ServiceViewStatus.Navigating);
+    }
 
-            UpdateState(ServiceViewStatus.Ready);
+    private void OnWebMessageReceived(
+        CoreWebView2 sender,
+        CoreWebView2WebMessageReceivedEventArgs args)
+    {
+        string message;
+        try
+        {
+            message = args.TryGetWebMessageAsString();
+        }
+        catch
+        {
             return;
         }
 
-        UpdateState(ServiceViewStatus.Navigating);
+        if (!ExternalLinkClickBridge.TryParseMessage(
+                message,
+                _externalLinkMessageToken,
+                out var destination))
+        {
+            return;
+        }
+
+        ExternalNavigationRequested?.Invoke(
+            this,
+            new ServiceExternalNavigationRequestedEventArgs(ProfileName, destination));
     }
 
     internal async Task<string> ExecuteScriptAsync(string script)
@@ -719,6 +732,7 @@ public sealed class ServiceViewHost : IDisposable
         _webView.NavigationCompleted -= OnNavigationCompleted;
         _webView.CoreWebView2.DocumentTitleChanged -= OnDocumentTitleChanged;
         _webView.CoreWebView2.ProcessFailed -= OnProcessFailed;
+        _webView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
         _webView.CoreWebView2.NewWindowRequested -= OnNewWindowRequested;
         _webView.CoreWebView2.PermissionRequested -= OnPermissionRequested;
         _webView.CoreWebView2.DownloadStarting -= OnDownloadStarting;

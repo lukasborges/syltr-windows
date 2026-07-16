@@ -17,6 +17,7 @@ structure, control placement and service workflows should stay recognizable.
 | Grouped-instance affordance, chooser and aggregate unread badge | Implemented |
 | Right-click menu: reload, home, edit, mute, disable, remove | Implemented in the same order with state-aware labels |
 | Drag whole service groups to reorder | Implemented and persisted |
+| Clicked `target=_blank` links open externally while OAuth/SSO stays in-app | Implemented with click classification before WebView2 popup handling |
 | Searchable, category-grouped add catalog with 28 px icons | Implemented in an owned native Windows dialog; all 37 reference recipes are present |
 | Separate custom-service action | Implemented as an icon action beside the catalog search field |
 | First run opens the add dialog instead of creating sample services | Implemented |
@@ -43,5 +44,5 @@ structure, control placement and service workflows should stay recognizable.
   corresponding failure; the Linux Teams workaround is WebKit-specific.
 - Import compatible Linux `services.json` configuration while requiring users to
   authenticate again in new WebView2 profiles.
-- Revisit automatic external-link classification after real OAuth/SSO testing. The
-  Windows build currently shows a native destination choice for cross-origin links.
+- Validate the automatic external-link versus OAuth/SSO classification against
+  real services, including the reported Google-to-corporate-SSO flow.

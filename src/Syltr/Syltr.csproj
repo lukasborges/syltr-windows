@@ -47,6 +47,7 @@
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
     <EmbeddedResource Include="Catalog\Services.json" />
+    <EmbeddedResource Include="Engine\WebAppScripts\ExternalLinks.js" />
   </ItemGroup>
 
   <!--

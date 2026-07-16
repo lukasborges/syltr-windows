@@ -482,9 +482,9 @@ below does not.
 16. Add a second instance of the same catalog service. Confirm the rail keeps a
     single grouped tile and shows the account/instance selector above the web
     content; its badge should aggregate unread counts from the group.
-17. Follow a cross-origin link and confirm the native choice offers Syltr for
-    OAuth/SSO or the default browser for a normal external link, without showing
-    URL paths or query strings in the prompt.
+17. Click a link that requests a new tab (`target=_blank`) and confirm it opens
+    directly in the default browser. Then exercise OAuth/SSO and confirm its
+    popup and redirects remain in Syltr without a destination prompt.
 18. Validate `Ctrl+N`, `Ctrl+E`, `Ctrl+R`, `Ctrl+Tab`,
     `Ctrl+Shift+Tab`, `Alt+Left`, `Alt+Right` and `Ctrl+Shift+M`.
 
@@ -511,7 +511,7 @@ The following items are deliberately unresolved until evidence is collected:
 
 - exact `ServiceViewHost` public API;
 - whether native WebView2 notifications fully cover persistent service-worker notifications;
-- popup UX for OAuth/SSO;
+- real-service validation of the automatic link versus OAuth/SSO classification;
 - whether all enabled services remain loaded indefinitely;
 - spell-check language controls;
 - configuration storage path for packaged versus unpackaged development;

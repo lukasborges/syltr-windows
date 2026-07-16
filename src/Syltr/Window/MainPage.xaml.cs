@@ -1112,66 +1112,12 @@ public sealed partial class MainPage : Page
         UpdateSelectedProfileStatus();
     }
 
-    private async void OnPopupRequested(object? sender, ServicePopupRequestedEventArgs e)
+    private void OnPopupRequested(object? sender, ServicePopupRequestedEventArgs e)
     {
         if (e.RequestedUri is null)
         {
             e.Cancel();
             return;
-        }
-
-        if (!e.IsSameOrigin)
-        {
-            await _contentDialogGate.WaitAsync();
-            try
-            {
-                if (!_isPageLoaded || XamlRoot is null)
-                {
-                    e.Cancel();
-                    return;
-                }
-
-                var dialog = new ContentDialog
-                {
-                    XamlRoot = XamlRoot,
-                    Title = "Onde abrir este link?",
-                    Content = $"Origem: {e.RequestedOrigin?.ToString() ?? e.RequestedUri.Scheme}\nPerfil: {e.PopupHost.ProfileName}\n\nUse Syltr para OAuth/SSO. Use o navegador para links externos comuns.",
-                    PrimaryButtonText = "Abrir no Syltr",
-                    SecondaryButtonText = "Navegador padrão",
-                    CloseButtonText = "Cancelar",
-                    DefaultButton = ContentDialogButton.Primary
-                };
-                var result = await dialog.ShowAsync();
-                if (result == ContentDialogResult.Secondary)
-                {
-                    var launched = await Windows.System.Launcher.LaunchUriAsync(e.RequestedUri);
-                    if (launched)
-                    {
-                        e.OpenExternal();
-                    }
-                    else
-                    {
-                        e.Cancel();
-                    }
-
-                    return;
-                }
-
-                if (result != ContentDialogResult.Primary)
-                {
-                    e.Cancel();
-                    return;
-                }
-            }
-            catch
-            {
-                e.Cancel();
-                return;
-            }
-            finally
-            {
-                _contentDialogGate.Release();
-            }
         }
 
         e.PopupHost.PopupRequested += OnPopupRequested;
@@ -1200,46 +1146,20 @@ public sealed partial class MainPage : Page
         object? sender,
         ServiceExternalNavigationRequestedEventArgs e)
     {
-        if (sender is not ServiceViewHost host)
-        {
-            return;
-        }
-
-        await _contentDialogGate.WaitAsync();
         try
         {
-            if (!_isPageLoaded || XamlRoot is null)
+            if (!await Windows.System.Launcher.LaunchUriAsync(e.Destination))
             {
-                return;
-            }
-
-            var dialog = new ContentDialog
-            {
-                XamlRoot = XamlRoot,
-                Title = "Este link sai do serviço atual",
-                Content = $"Destino: {e.DestinationOrigin?.ToString() ?? e.Destination.Scheme}\nPerfil: {e.ProfileName}",
-                PrimaryButtonText = "Continuar no Syltr",
-                SecondaryButtonText = "Navegador padrão",
-                CloseButtonText = "Cancelar",
-                DefaultButton = ContentDialogButton.Secondary
-            };
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
-            {
-                host.Navigate(e.Destination);
-            }
-            else if (result == ContentDialogResult.Secondary)
-            {
-                await Windows.System.Launcher.LaunchUriAsync(e.Destination);
+                StatusInfoBar.Title = "Não foi possível abrir o link";
+                StatusInfoBar.Message = e.DestinationOrigin?.ToString() ?? e.Destination.Scheme;
+                StatusInfoBar.Severity = InfoBarSeverity.Error;
             }
         }
         catch
         {
-            // Canceling the original navigation is the safe fallback.
-        }
-        finally
-        {
-            _contentDialogGate.Release();
+            StatusInfoBar.Title = "Não foi possível abrir o link";
+            StatusInfoBar.Message = e.DestinationOrigin?.ToString() ?? e.Destination.Scheme;
+            StatusInfoBar.Severity = InfoBarSeverity.Error;
         }
     }
 

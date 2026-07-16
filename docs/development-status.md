@@ -9,7 +9,7 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 104 testes aprovados e nenhum teste com falha ou ignorado.
+- A suíte possui 109 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -27,6 +27,8 @@ Windows. A auditoria detalhada de paridade continua em
   ícones e suporte a múltiplas instâncias.
 - Perfis WebView2 persistentes e isolados, popups OAuth/SSO no mesmo perfil,
   remoção de perfil, recuperação de processo e captura de memória.
+- Links clicados com `target=_blank` abrem automaticamente no navegador padrão;
+  redirects e popups OAuth/SSO permanecem no Syltr sem diálogo intermediário.
 - Permissões, downloads, favicons, contagem de não lidos, notificações web e
   notificações nativas do Windows.
 - Configuração JSON atômica com esquema/migração, preferências, ordem dos
