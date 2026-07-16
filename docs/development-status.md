@@ -9,7 +9,9 @@ Windows. A auditoria detalhada de paridade continua em
 ## Estado validado
 
 - O aplicativo compila em Debug sem avisos ou erros.
-- A suíte possui 122 testes aprovados e nenhum teste com falha ou ignorado.
+- O aplicativo compila em Release sem avisos ou erros e o script
+  `scripts/build-msix.ps1` gera um MSIX x64 não assinado.
+- A suíte possui 123 testes aprovados e nenhum teste com falha ou ignorado.
 - O script `scripts/run-isolation-spike.ps1` gera e abre a versão WinUI 3
   unpackaged usada para testes visuais.
 - A janela **Adicionar serviço** foi validada visualmente e aprovada como janela
@@ -67,6 +69,8 @@ marco deve começar pelos itens técnicos restantes, nesta ordem:
    [`accessibility-test-plan.md`](accessibility-test-plan.md).
 2. Testar quirks de user-agent e scripts específicos somente se um serviço
    apresentar falha real no Chromium/WebView2.
+3. Definir identidade, publisher e assinatura do MSIX para permitir a
+   instalação do pacote Release em máquinas de teste.
 
 Ao retomar, execute primeiro:
 

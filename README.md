@@ -315,7 +315,7 @@ Exit criterion: a user can configure multiple services/accounts, restart the app
 
 - [ ] Automated test matrix for core services.
 - [x] CI build and tests for pull requests.
-- [ ] Release build and MSIX generation.
+- [x] Release build and MSIX generation (unsigned x64 artifact validated locally).
 - [ ] Package identity, publisher and signing strategy.
 - [ ] WebView2 Evergreen prerequisite handling.
 - [ ] x64 release first; ARM64 after validation.
@@ -429,6 +429,22 @@ contain account or application data and should be reviewed before sharing.
 dotnet restore Syltr.slnx
 dotnet build Syltr.slnx -c Debug
 ```
+
+### Release package
+
+Generate the currently validated x64 MSIX with:
+
+```powershell
+.\scripts\build-msix.ps1
+```
+
+The local package is intentionally unsigned while the final package identity,
+publisher and certificate strategy remain open. Windows requires an MSIX to be
+signed with a certificate trusted by the target machine before installation.
+The package is written below `src\Syltr\AppPackages`, which is ignored by Git.
+Machines without the Visual C++ UWP symbol tools may report that
+`mspdbcmf.exe` is unavailable; this skips only the optional symbol package and
+does not prevent MSIX generation.
 
 ### Test
 
